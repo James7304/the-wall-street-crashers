@@ -14,12 +14,12 @@ function percentageChange($oldValue, $newValue) {
 
 $res = array('value' => 0);
 session_start();
-if(isset($_SESSION['user_acc'])){
+if(isset($_SESSION['user_acc']) && isset($_POST['end_point'])){
 
     include '../global/connection.php';
 
-    $total_portfolio = mysqli_query($conn, "SELECT SUM(quantity*price_per_unit) FROM alpha_portfolio");
-    $user_shares = mysqli_query($conn, "SELECT (alpha_shares / (SELECT SUM(alpha_shares) FROM users)), alpha_deposited FROM users WHERE user_acc = '".$_SESSION['user_acc']."'");
+    $total_portfolio = mysqli_query($conn, "SELECT SUM(quantity*price_per_unit) FROM ".$_POST['end_point']."portfolio");
+    $user_shares = mysqli_query($conn, "SELECT (".$_POST['end_point']."shares / (SELECT SUM(".$_POST['end_point']."shares) FROM users)), ".$_POST['end_point']."deposited FROM users WHERE user_acc = '".$_SESSION['user_acc']."'");
 
     $portfolio_row = mysqli_fetch_row($total_portfolio);
     $user_row = mysqli_fetch_row($user_shares);

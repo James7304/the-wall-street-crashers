@@ -19,7 +19,7 @@ if($chartTime == "week"){
 }
 
 // Prepare and execute query to fetch all trades
-$sql = "SELECT * FROM alpha_history " . $query_condition . " ORDER BY time ASC";
+$sql = "SELECT valuation, date(time) AS time FROM ".$_POST['end_point']."history " . $query_condition . " ORDER BY time ASC";
 $result = mysqli_query($conn, $sql);
 
 // Create an array to hold the trades
