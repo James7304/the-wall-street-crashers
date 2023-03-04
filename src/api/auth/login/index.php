@@ -29,7 +29,7 @@ if(isset($_POST['email']) && isset($_POST['password'])){
     if (mysqli_num_rows($result) > 0) {
         $res = array('login' => true);
         session_start();
-        $_SESSION['user_id'] = mysqli_fetch_array($result)['user_id'];
+        $_SESSION['user_acc'] = mysqli_fetch_array($result)['user_acc'];
     }
 
 }
