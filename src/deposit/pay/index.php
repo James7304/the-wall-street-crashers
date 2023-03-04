@@ -8,7 +8,7 @@
         <link href="../../../+assets/css/dashboard.css" rel="stylesheet">
         
         <script src="https://js.stripe.com/v3/"></script>
-        <script src="../scripts/checkout.js" defer></script>
+        <script src="../pay/scripts/checkout.js" defer></script>
     </head>
     <body>
 
