@@ -46,6 +46,7 @@ switch ($event->type) {
 
     include '../../global/connection.php';
     mysqli_query($conn, "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_recieved." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
+    echo "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_recieved." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'";
     break;
 
   default:
