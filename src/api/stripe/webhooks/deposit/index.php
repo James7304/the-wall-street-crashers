@@ -51,7 +51,7 @@ switch ($event->type) {
     $share_price = intval($value)/intval($shares);
 
     mysqli_query($conn, "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_received.", shares = shares + ".$paymentIntent->amount_received/$share_price." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
-    mysqli_query($conn, "UPDATE portfolio SET cash = cash + ".$paymentIntent->amount_received);
+    mysqli_query($conn, "UPDATE portfolio SET quantity = quantity + ".$paymentIntent->amount_received." WHERE ticker = 'cash'");
 
     break;
 
