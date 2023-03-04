@@ -3,7 +3,7 @@
 include '../global/connection.php';
 
 // Prepare and execute query to fetch all trades
-$sql = "SELECT * FROM trades ORDER BY traded_at DESC LIMIT 3";
+$sql = "SELECT ticker, type, price, traded_at FROM trades ORDER BY traded_at DESC LIMIT 3";
 $result = mysqli_query($conn, $sql);
 
 // Create an array to hold the trades
