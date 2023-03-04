@@ -20,7 +20,7 @@ $stripe = new \Stripe\StripeClient('sk_test_51MhtvNIbq7fKxkhRCIyMxtpdd3NjZkUyLTd
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 $endpoint_secret = 'whsec_ddf82a3c6c2e868d1fb3d948c1a70d366d90b39c89171d448f61cfbc3bb29c3a';
 
-$payload = @file_get_contents('php://input');
+$payload = file_get_contents('php://input');
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
 $event = null;
 

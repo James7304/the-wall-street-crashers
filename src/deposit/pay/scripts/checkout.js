@@ -46,7 +46,7 @@ async function handleSubmit(e) {
     elements,
     confirmParams: {
       // Make sure to change this to your payment completion page
-      return_url: "http://localhost:8080/deposit/success",
+      return_url: "http://localhost:8080/deposit/success/?amount=" + amount.amount,
       receipt_email: emailAddress,
     },
   });
