@@ -42,10 +42,10 @@ try {
 switch ($event->type) {
   case 'payment_intent.succeeded':
     $paymentIntent = $event->data->object;
-
-    //include '../../global/connection.php';
-    //mysqli_query($conn, "UPDATE users SET deposited = deposited + WHERE user_acc = ''");
     echo json_encode($paymentIntent);
+
+    include '../../global/connection.php';
+    mysqli_query($conn, "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_recieved." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
     break;
 
   default:
