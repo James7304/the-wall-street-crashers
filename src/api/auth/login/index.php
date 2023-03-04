@@ -22,7 +22,8 @@ if(isset($_POST['email']) && isset($_POST['password'])){
     $encrypted_password = hash('sha512', $password);
 
     // Prepare and execute query to fetch user from database
-    $sql = "SELECT * FROM users WHERE email = '$email' AND password = '$encrypted_password'";
+    $res['pass'] = $encrypted_password;
+    $sql = "SELECT * FROM users WHERE email = '".$email."' AND password = '".$encrypted_password."'";
     $result = mysqli_query($conn, $sql);
 
     // Check if user was found
