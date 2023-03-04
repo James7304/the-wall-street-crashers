@@ -20,7 +20,7 @@
             }
 
             session_start();
-            $_SESSION['end-point'] = $_GET['end-point'];
+            $_SESSION['end_point'] = $_GET['end-point'];
 
         ?>
         
