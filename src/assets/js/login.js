@@ -5,7 +5,7 @@ function login(event){
     
     var http = new XMLHttpRequest();
     var url = './api/auth/login/';
-    var params = 'email=' + document.querySelector('#email') + '&password=' + document.querySelector('#password');
+    var params = 'email=' + document.querySelector('#email').value + '&password=' + document.querySelector('#password').value;
     http.open('POST', url, true);
 
     //Send the proper header information along with the request
@@ -13,7 +13,7 @@ function login(event){
 
     http.onreadystatechange = function() {//Call a function when the state changes.
         if(http.readyState == 4 && http.status == 200) {
-            alert(http.responseText);
+            window.location.href="./dashboard"
         }
     }
     http.send(params);
