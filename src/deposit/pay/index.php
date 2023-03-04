@@ -58,7 +58,7 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="../../../assets/js/deposit.js" type="text/javascript"></script>
+        <script src="../../assets/js/deposit.js" type="text/javascript"></script>
 
     </body>
 </html>
