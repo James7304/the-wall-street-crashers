@@ -1,11 +1,12 @@
 
-var historyChart = "";
-function loadValuation(){
+var historyChart = {alpha_:"", hacky_:""};
+
+function loadValuation(endPoint){
 
 
     var http = new XMLHttpRequest();
     var url = '../api/trade_data/valuation';
-    var params = '';
+    var params = 'end_point=' + endPoint;
     http.open('POST', url, true);
 
     //Send the proper header information along with the request
@@ -15,21 +16,21 @@ function loadValuation(){
         if(http.readyState == 4 && http.status == 200) {
 
             const res = JSON.parse(http.responseText)
-            document.querySelector('#value').textContent = "£" + (parseInt(res['value'])/100).toFixed(2);
+            document.querySelector('#' + endPoint + 'value').textContent = "£" + (parseInt(res['value'])/100).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             
-            document.querySelector('#return').textContent = (res['return'] != 0 ? (res['return'] > 0 ? "↑ " : "↓ ") : "") + res['return'] + "%";
-            document.querySelector('#return').classList.add(res['return'] >= 0 ? "text-success" : "text-danger");
+            document.querySelector('#' + endPoint + 'return').textContent = (parseFloat(res['return']) != 0 ? (parseFloat(res['return']) > 0 ? "↑ " : "↓ ") : "") + res['return'] + "%";
+            document.querySelector('#' + endPoint + 'return').classList.add(parseFloat(res['return']) >= 0 ? "text-success" : "text-danger");
 
-            document.querySelector('#valuation-spinner').classList.add('d-none');
+            document.querySelector('#' + endPoint + 'valuation-spinner').classList.add('d-none');
         }
     }
     http.send(params);
 }
-function loadTrades(chartTime){
+function loadTrades(endPoint){
 
     var http = new XMLHttpRequest();
     var url = '../api/trade_data/trades';
-    var params = 'chartTime=' + chartTime;
+    var params = 'end_point=' + endPoint;
     http.open('POST', url, true);
 
     //Send the proper header information along with the request
@@ -42,7 +43,7 @@ function loadTrades(chartTime){
 
             res.forEach(trade => {
                 
-                document.querySelector('#trades-spinner').classList.add('d-none');
+                document.querySelector('#' + endPoint + 'trades-spinner').classList.add('d-none');
                 // Create the list item element
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
@@ -68,7 +69,7 @@ function loadTrades(chartTime){
                 const div3 = document.createElement('div');
                 div3.classList.add('col-3', 'p-0', 'pe-2');
                 div3.style.textAlign = 'right';
-                div3.textContent = trade.hour + ':' + trade.minute;
+                div3.textContent = trade.hour + ':' + (trade.minute.length == 1 ? "0" + trade.minute : trade.minute);
 
                 // Add the three divs to the row div
                 divRow.appendChild(div1);
@@ -78,18 +79,18 @@ function loadTrades(chartTime){
                 // Add the row div to the list item
                 li.appendChild(divRow);
 
-                document.querySelector('#recent-trades').appendChild(li);
+                document.querySelector('#' + endPoint + 'recent-trades').appendChild(li);
 
             });
         }
     }
     http.send(params);
 }
-function loadHistory(){
+function loadHistory(endPoint, chartTime){
 
     var http = new XMLHttpRequest();
     var url = '../api/trade_data/history';
-    var params = '';
+    var params = 'end_point=' + endPoint + '&chartTime=' + chartTime;
     http.open('POST', url, true);
 
     //Send the proper header information along with the request
@@ -98,7 +99,7 @@ function loadHistory(){
     http.onreadystatechange = function() {//Call a function when the state changes.
         if(http.readyState == 4 && http.status == 200) {
 
-            document.querySelector('#history-spinner').classList.add('d-none');
+            document.querySelector('#' + endPoint + 'history-spinner').classList.add('d-none');
 
             const res = JSON.parse(http.responseText);
 
@@ -115,10 +116,10 @@ function loadHistory(){
 
             });
     
-            const ctx = document.getElementById('historyChart');
-            if(historyChart != "") historyChart.destroy();
+            const ctx = document.getElementById(endPoint + 'HistoryChart');
+            if(historyChart[endPoint] != "") historyChart[endPoint].destroy();
 
-            historyChart = new Chart(ctx, {
+            historyChart[endPoint] = new Chart(ctx, {
                 type: 'line',
                 data: {
                     datasets: [{
@@ -148,6 +149,10 @@ function loadHistory(){
     http.send(params);
 }
 
-loadValuation();
-loadTrades();
-loadHistory();
+loadValuation('alpha_');
+loadTrades('alpha_');
+loadHistory('alpha_');
+
+loadValuation('hacky_');
+loadTrades('hacky_');
+loadHistory('hacky_');
