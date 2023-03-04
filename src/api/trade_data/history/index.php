@@ -19,7 +19,7 @@ if($chartTime == "week"){
 }
 
 // Prepare and execute query to fetch all trades
-$sql = "SELECT * FROM history " . $query_condition;
+$sql = "SELECT * FROM history " . $query_condition . " ORDER BY time ASC";
 $result = mysqli_query($conn, $sql);
 
 // Create an array to hold the trades
