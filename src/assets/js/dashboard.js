@@ -17,8 +17,8 @@ function loadValuation(){
             const res = JSON.parse(http.responseText)
             document.querySelector('#value').textContent = "£" + (parseInt(res['value'])/100).toFixed(2);
             
-            document.querySelector('#return').textContent = (res['return'] != 0 ? (res['return'] > 0 ? "↑ " : "↓ ") : "") + res['return'] + "%";
-            document.querySelector('#return').classList.add(res['return'] >= 0 ? "text-success" : "text-danger");
+            document.querySelector('#return').textContent = (parseFloat(res['return']) != 0 ? (parseFloat(res['return']) > 0 ? "↑ " : "↓ ") : "") + res['return'] + "%";
+            document.querySelector('#return').classList.add(parseFloat(res['return']) >= 0 ? "text-success" : "text-danger");
 
             document.querySelector('#valuation-spinner').classList.add('d-none');
         }
@@ -68,7 +68,7 @@ function loadTrades(chartTime){
                 const div3 = document.createElement('div');
                 div3.classList.add('col-3', 'p-0', 'pe-2');
                 div3.style.textAlign = 'right';
-                div3.textContent = trade.hour + ':' + trade.minute;
+                div3.textContent = trade.hour + ':' + (trade.minute.length == 1 ? "0" + trade.minute : trade.minute);
 
                 // Add the three divs to the row div
                 divRow.appendChild(div1);
