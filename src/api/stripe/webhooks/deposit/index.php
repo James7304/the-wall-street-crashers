@@ -45,7 +45,7 @@ switch ($event->type) {
 
     include '../../global/connection.php';
 
-    echo $paymentIntent->metadata->end_point;
+    echo json_encode($paymentIntent);
     $shares = mysqli_query($conn, "SELECT SUM(".$paymentIntent->metadata->end_point."shares) FROM users");
     $value = mysqli_query($conn, "SELECT SUM(quantity * price_per_unit) FROM ".$paymentIntent->metadata->end_point."portfolio");
 
