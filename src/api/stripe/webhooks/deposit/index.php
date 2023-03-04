@@ -42,10 +42,17 @@ try {
 switch ($event->type) {
   case 'payment_intent.succeeded':
     $paymentIntent = $event->data->object;
-    echo json_encode($paymentIntent);
 
     include '../../global/connection.php';
-    mysqli_query($conn, "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_received." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
+
+    $shares = mysqli_query($conn, "SELECT SUM(shares) FROM users");
+    $value = mysqli_query($conn, "SELECT quantity * price_per_unit FROM portfolio");
+
+    $share_price = intval($value)/intval($shares);
+
+    mysqli_query($conn, "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_received.", shares = shares + ".$paymentIntent->amount_received/$share_price." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
+    mysqli_query($conn, "UPDATE portfolio SET cash = cash + ".$paymentIntent->amount_received);
+
     break;
 
   default:
