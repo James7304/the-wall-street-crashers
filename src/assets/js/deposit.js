@@ -6,5 +6,5 @@ function deposit(){
         return;
     }
 
-    window.location.href = "./pay?amount=" + (amount*100).toFixed(0);
+    window.location.href = "./pay?amount=" + (amount*100).toFixed(0) + "&end-point=" + document.querySelector('#end-point').value;
 }

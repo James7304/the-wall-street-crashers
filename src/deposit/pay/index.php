@@ -8,16 +8,19 @@
         <link href="../../assets/css/dashboard.css" rel="stylesheet">
         
         <script src="https://js.stripe.com/v3/"></script>
-        <script src="./scripts/checkout.js" defer></script>
+        <script src="./pay/scripts/checkout.js" defer></script>
     </head>
     <body>
 
         <?php
 
             session_start();
-            if(!isset($_SESSION['user_acc'])){
+            if(!isset($_SESSION['user_acc']) || !isset($_GET['amount']) || !isset($_GET['end-point'])){
                 header('Location: ../../');
             }
+
+            session_start();
+            $_SESSION['end-point'] = $_GET['end-point'];
 
         ?>
         
@@ -47,9 +50,9 @@
                         <div id="payment-element">
                             <!--Stripe.js injects the Payment Element-->
                         </div>
-                        <button id="submit">
+                        <button id="submit" class="btn btn-primary mt-3">
                             <div class="spinner hidden" id="spinner"></div>
-                            <span id="button-text">Pay now</span>
+                            <span id="button-text">Deposit</span>
                         </button>
                         <div id="payment-message" class="hidden"></div>
                     </form>

@@ -25,6 +25,7 @@ try {
         ],
         'metadata' => [
             'user_acc' => $_SESSION['user_acc'],
+            'end_point' => $_SESSION['end_point']
         ],
     ]);
 

@@ -45,13 +45,13 @@ switch ($event->type) {
 
     include '../../global/connection.php';
 
-    $shares = mysqli_query($conn, "SELECT SUM(shares) FROM users");
-    $value = mysqli_query($conn, "SELECT SUM(quantity * price_per_unit) FROM portfolio");
+    $shares = mysqli_query($conn, "SELECT SUM(".$paymentIntent->metadata->end_point."shares) FROM users");
+    $value = mysqli_query($conn, "SELECT SUM(quantity * price_per_unit) FROM ".$paymentIntent->metadata->end_point."portfolio");
 
     $share_price = intval(mysqli_fetch_row($value)[0])/intval(mysqli_fetch_row($shares)[0]);
 
-    mysqli_query($conn, "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_received.", shares = shares + ".$paymentIntent->amount_received/$share_price." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
-    mysqli_query($conn, "UPDATE portfolio SET quantity = quantity + ".$paymentIntent->amount_received." WHERE ticker = 'cash'");
+    mysqli_query($conn, "UPDATE users SET ".$paymentIntent->metadata->end_point."deposited = ".$paymentIntent->metadata->end_point."deposited + ".$paymentIntent->amount_received.", ".$paymentIntent->metadata->end_point."shares = ".$paymentIntent->metadata->end_point."shares + ".$paymentIntent->amount_received/$share_price." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
+    mysqli_query($conn, "UPDATE ".$paymentIntent->metadata->end_point."portfolio SET quantity = quantity + ".$paymentIntent->amount_received." WHERE ticker = 'cash'");
 
     break;
 

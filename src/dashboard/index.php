@@ -42,7 +42,7 @@
                             Your Portfolio
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title">Valuation</h5>
+                            <h5 class="card-title">Total Valuation</h5>
                             <h3 id="value"></h3>
                             <span class="" id="return"></span>
                             <div class="spinner-border m-2" role="status" id="valuation-spinner"></div>
@@ -51,10 +51,22 @@
 
                     <div class="card mt-3">
                         <div class="card-header">
-                            Recent Trades
+                            Alpha Valuation
                         </div>
-                        <ul class="list-group list-group-flush" id="recent-trades">
-                            <div class="spinner-border m-3" role="status" id="trades-spinner"></div>
+                        <div class="card-body">
+                            <h5 class="card-title">Valuation</h5>
+                            <h3 id="alpha-value"></h3>
+                            <span class="" id="alpha-return"></span>
+                            <div class="spinner-border m-2" role="status" id="alpha-valuation-spinner"></div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            Recent Alpha Trades
+                        </div>
+                        <ul class="list-group list-group-flush" id="alpha-recent-trades">
+                            <div class="spinner-border m-3" role="status" id="alpha-trades-spinner"></div>
                         </ul>
 
                     </div>
@@ -62,17 +74,17 @@
                 </div>
                 <div class="col-12 col-md-8 mt-3 mt-md-0"><div class="card">
                         <div class="card-header">
-                            Fund History
+                            Alpha Fund History
                         </div>
                         <div class="card-body" style="position:relative;">
                             <div class="mb-4" style="text-align:right;">
-                                <a onclick="loadHistory('week')" class="text-blue me-2" role="button">Week</a>
-                                <a onclick="loadHistory('month')" class="text-blue me-2" role="button">Month</a>
-                                <a onclick="loadHistory('year')" class="text-blue me-2" role="button">Year</a>
-                                <a onclick="loadHistory('all')" class="text-blue me-2" role="button">All time</a>
+                                <a onclick="loadAlphaHistory('week')" class="text-blue me-2" role="button">Week</a>
+                                <a onclick="loadAlphaHistory('month')" class="text-blue me-2" role="button">Month</a>
+                                <a onclick="loadAlphaHistory('year')" class="text-blue me-2" role="button">Year</a>
+                                <a onclick="loadAlphaHistory('all')" class="text-blue me-2" role="button">All time</a>
                             </div>
-                            <div class="spinner-border m-3" role="status" id="history-spinner"></div>
-                            <canvas id="historyChart"></canvas>
+                            <div class="spinner-border m-3" role="status" id="alpha-history-spinner"></div>
+                            <canvas id="alphaHistoryChart"></canvas>
                         </div>
                     </div>
                 </div>

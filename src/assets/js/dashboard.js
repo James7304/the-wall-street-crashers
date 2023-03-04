@@ -1,10 +1,10 @@
 
-var historyChart = "";
-function loadValuation(){
+var alphaHistoryChart = "";
+function loadAlphaValuation(){
 
 
     var http = new XMLHttpRequest();
-    var url = '../api/trade_data/valuation';
+    var url = '../api/trade_data/alpha_valuation';
     var params = '';
     http.open('POST', url, true);
 
@@ -15,20 +15,20 @@ function loadValuation(){
         if(http.readyState == 4 && http.status == 200) {
 
             const res = JSON.parse(http.responseText)
-            document.querySelector('#value').textContent = "£" + (parseInt(res['value'])/100).toFixed(2);
+            document.querySelector('#alpha-value').textContent = "£" + (parseInt(res['value'])/100).toFixed(2);
             
-            document.querySelector('#return').textContent = (parseFloat(res['return']) != 0 ? (parseFloat(res['return']) > 0 ? "↑ " : "↓ ") : "") + res['return'] + "%";
-            document.querySelector('#return').classList.add(parseFloat(res['return']) >= 0 ? "text-success" : "text-danger");
+            document.querySelector('#alpha-return').textContent = (parseFloat(res['return']) != 0 ? (parseFloat(res['return']) > 0 ? "↑ " : "↓ ") : "") + res['return'] + "%";
+            document.querySelector('#alpha-return').classList.add(parseFloat(res['return']) >= 0 ? "text-success" : "text-danger");
 
-            document.querySelector('#valuation-spinner').classList.add('d-none');
+            document.querySelector('#alpha-valuation-spinner').classList.add('d-none');
         }
     }
     http.send(params);
 }
-function loadTrades(chartTime){
+function loadAlphaTrades(chartTime){
 
     var http = new XMLHttpRequest();
-    var url = '../api/trade_data/trades';
+    var url = '../api/trade_data/alpha_trades';
     var params = 'chartTime=' + chartTime;
     http.open('POST', url, true);
 
@@ -42,7 +42,7 @@ function loadTrades(chartTime){
 
             res.forEach(trade => {
                 
-                document.querySelector('#trades-spinner').classList.add('d-none');
+                document.querySelector('#alpha-trades-spinner').classList.add('d-none');
                 // Create the list item element
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
@@ -78,17 +78,17 @@ function loadTrades(chartTime){
                 // Add the row div to the list item
                 li.appendChild(divRow);
 
-                document.querySelector('#recent-trades').appendChild(li);
+                document.querySelector('#alpha-recent-trades').appendChild(li);
 
             });
         }
     }
     http.send(params);
 }
-function loadHistory(){
+function loadAlphaHistory(){
 
     var http = new XMLHttpRequest();
-    var url = '../api/trade_data/history';
+    var url = '../api/trade_data/alpha_history';
     var params = '';
     http.open('POST', url, true);
 
@@ -98,7 +98,7 @@ function loadHistory(){
     http.onreadystatechange = function() {//Call a function when the state changes.
         if(http.readyState == 4 && http.status == 200) {
 
-            document.querySelector('#history-spinner').classList.add('d-none');
+            document.querySelector('#alpha-history-spinner').classList.add('d-none');
 
             const res = JSON.parse(http.responseText);
 
@@ -115,10 +115,10 @@ function loadHistory(){
 
             });
     
-            const ctx = document.getElementById('historyChart');
-            if(historyChart != "") historyChart.destroy();
+            const ctx = document.getElementById('alphaHistoryChart');
+            if(alphaHistoryChart != "") alphaHistoryChart.destroy();
 
-            historyChart = new Chart(ctx, {
+            alphaHistoryChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     datasets: [{
@@ -148,6 +148,6 @@ function loadHistory(){
     http.send(params);
 }
 
-loadValuation();
-loadTrades();
-loadHistory();
+loadAlphaValuation();
+loadAlphaTrades();
+loadAlphaHistory();
