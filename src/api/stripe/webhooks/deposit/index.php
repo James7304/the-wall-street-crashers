@@ -46,12 +46,9 @@ switch ($event->type) {
     include '../../global/connection.php';
 
     $shares = mysqli_query($conn, "SELECT SUM(shares) FROM users");
-    $value = mysqli_query($conn, "SELECT quantity * price_per_unit FROM portfolio");
+    $value = mysqli_query($conn, "SELECT SUM(quantity * price_per_unit) FROM portfolio");
 
-    $shares_issued = mysqli_fetch_row($value)[0];
-
-    $share_price = intval($share_price)/intval(mysqli_fetch_row($shares)[0]);
-    echo $shares_issued;
+    $share_price = intval(mysqli_fetch_row($value)[0])/intval(mysqli_fetch_row($shares)[0]);
 
     mysqli_query($conn, "UPDATE users SET deposited = deposited + ".$paymentIntent->amount_received.", shares = shares + ".$paymentIntent->amount_received/$share_price." WHERE user_acc = '".$paymentIntent->metadata->user_acc."'");
     mysqli_query($conn, "UPDATE portfolio SET quantity = quantity + ".$paymentIntent->amount_received." WHERE ticker = 'cash'");
