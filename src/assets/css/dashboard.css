@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "Lora Regular";
+    src: url(../fonts/the-wall-street-crashers-lora-regular.ttf);
+}
+
+.title-logo{
+    font-family: 'Lora Regular';
+    color:rgb(7, 143, 7);
+}

@@ -1,4 +1,5 @@
 
+var historyChart = "";
 function loadValuation(){
 
 
@@ -24,11 +25,11 @@ function loadValuation(){
     }
     http.send(params);
 }
-function loadTrades(){
+function loadTrades(chartTime){
 
     var http = new XMLHttpRequest();
     var url = '../api/trade_data/trades';
-    var params = '';
+    var params = 'chartTime=' + chartTime;
     http.open('POST', url, true);
 
     //Send the proper header information along with the request
@@ -84,6 +85,69 @@ function loadTrades(){
     }
     http.send(params);
 }
+function loadHistory(){
+
+    var http = new XMLHttpRequest();
+    var url = '../api/trade_data/history';
+    var params = '';
+    http.open('POST', url, true);
+
+    //Send the proper header information along with the request
+    http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    http.onreadystatechange = function() {//Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+
+            document.querySelector('#history-spinner').classList.add('d-none');
+
+            const res = JSON.parse(http.responseText);
+
+            var data = [];
+
+            res.forEach(point => {
+                
+                data.push(
+                    {
+                        x: point.time,
+                        y: (parseInt(point.valuation)/100000).toFixed(2) - 100
+                    }
+                );
+
+            });
+    
+            const ctx = document.getElementById('historyChart');
+            if(historyChart != "") historyChart.destroy();
+
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        data: data
+                    }],
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                // Include a dollar sign in the ticks
+                                callback: function(value, index, ticks) {
+                                    return value + "%";
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    http.send(params);
+}
 
 loadValuation();
 loadTrades();
+loadHistory();
