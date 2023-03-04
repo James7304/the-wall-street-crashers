@@ -44,8 +44,9 @@ switch ($event->type) {
     $paymentIntent = $event->data->object;
 
     //include '../../global/connection.php';
-    //mysqli_query($conn, "INSERT INTO ");
-    echo "success";
+    //mysqli_query($conn, "UPDATE users SET deposited = deposited + WHERE user_acc = ''");
+    echo json_encode($paymentIntent);
+    break;
 
   default:
     echo 'Received unknown event type ' . $event->type;
