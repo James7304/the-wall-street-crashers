@@ -28,18 +28,7 @@ class DBAPI:
         database = "u202629177_wsc"
 
         self.type = type
-
-        # Create a connection to the database
-        self.conn = pymysql.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database,
-            cursorclass=pymysql.cursors.DictCursor
-        )
-
-        # Create a cursor object to execute SQL queries
-        self.cursor = self.conn.cursor()
+        self.open()
 
     def buy_stock(self, ticker, n, price):
         self.insert_stock(ticker, n, price)
@@ -130,6 +119,21 @@ class DBAPI:
         self.cursor.execute(f"delete from {self.type}trades")
         self.conn.commit()
 
+
+    def open():
+
+        # Create a connection to the database
+        self.conn = pymysql.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        # Create a cursor object to execute SQL queries
+        self.cursor = self.conn.cursor()
+        
     def close(self):
         self.cursor.close()
         self.conn.close()
