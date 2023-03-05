@@ -24,7 +24,7 @@ if(isset($_SESSION['user_acc']) && isset($_POST['end_point'])){
     $portfolio_row = mysqli_fetch_row($total_portfolio);
     $user_row = mysqli_fetch_row($user_shares);
 
-    $res['value'] = round($portfolio_row[0] * $user_row[0] / 100, 0);
+    $res['value'] = round($portfolio_row[0] * $user_row[0], 0);
     $res['return'] = number_format(percentageChange($user_row[1], $res['value']), 2);
 
 }
