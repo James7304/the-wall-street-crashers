@@ -11,11 +11,11 @@
 // 3) Run the server on http://localhost:4242
 //   php -S localhost:4242
 
-require 'vendor/autoload.php';
+require '../../../../vendor/autoload.php';
 
 // The library needs to be configured with your account's secret key.
 // Ensure the key is kept out of any version control system you might be using.
-$stripe = new \Stripe\StripeClient('sk_test_...');
+$stripe = new \Stripe\StripeClient('sk_test_51MhtvNIbq7fKxkhRCIyMxtpdd3NjZkUyLTdS2ehAHjZM6sWuU5YGp5iEGTAdBMyET6mGYlrs1g7Y7W9CUzEc9lo000m6UGyp7a');
 
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 $endpoint_secret = 'whsec_ddf82a3c6c2e868d1fb3d948c1a70d366d90b39c89171d448f61cfbc3bb29c3a';
@@ -42,7 +42,7 @@ try {
 switch ($event->type) {
   case 'payment_intent.succeeded':
     $paymentIntent = $event->data->object;
-  // ... handle other event types
+    echo json_encode($paymentIntent);
   default:
     echo 'Received unknown event type ' . $event->type;
 }
