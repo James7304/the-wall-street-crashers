@@ -18,14 +18,13 @@ tickers = ["AAPL", "TSLA", "AMZN", "GOOGL"]
 def get_ticker(stock_i):
 
 	ticker = tickers[stock_i]
-	stock_i += 1
 	if stock_i == len(tickers):
 		stock_i = 0
 	return ticker
 
 def buy(stock_i):
 	ticker = get_ticker(stock_i)
-	price = yf.Ticker(ticker).history()['Close'].iloc[-1]
+	price = yf.Ticker(ticker).history()['Close'].iloc[-1] * 100
 
 	api.open()
 	api.buy_stock(ticker, 1, price)
@@ -117,10 +116,12 @@ while True:
 
 			if fromLeft and averageX > 150:
 				buy(stock_i)
+				stock_i += 1
 				print("buy")
 				canOrder = False
 			elif not fromLeft and averageX <= 150:
 				sell(stock_i)
+				stock_i += 1
 				print("sell")
 				canOrder = False
 			
