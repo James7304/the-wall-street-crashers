@@ -22,10 +22,10 @@ import pymysql.cursors
 class DBAPI:
     def __init__(self, type):
         # Set the database credentials
-        host = "sql750.main-hosting.eu"
-        user = "u202629177_wsc"
-        password = "z0|xo@!K"
-        database = "u202629177_wsc"
+        self.host = "sql750.main-hosting.eu"
+        self.user = "u202629177_wsc"
+        self.password = "z0|xo@!K"
+        self.database = "u202629177_wsc"
 
         self.type = type
         self.open()
@@ -71,7 +71,7 @@ class DBAPI:
             self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
             numSold = quantity
 
-        self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
+        self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
         self.conn.commit()
         
         return numSold
@@ -120,14 +120,14 @@ class DBAPI:
         self.conn.commit()
 
 
-    def open():
+    def open(self):
 
         # Create a connection to the database
         self.conn = pymysql.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database,
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            database=self.database,
             cursorclass=pymysql.cursors.DictCursor
         )
 

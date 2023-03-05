@@ -37,7 +37,7 @@ def sell(stock_i):
 	price = yf.Ticker(ticker).history()['Close'].iloc[-1]
 
 	api.open()
-	api.sell_stock(ticker, 1, price)
+	api.sell_stock(ticker, 1)
 	api.close()
 	return
 
