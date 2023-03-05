@@ -1,5 +1,5 @@
 import pymysql.cursors
-
+import datetime
 
 # # Set the database credentials
 # host = "sql750.main-hosting.eu"
@@ -33,7 +33,7 @@ class DBAPI:
     def buy_stock(self, ticker, n, price):
         self.insert_stock(ticker, n, price)
         self.insert_trade(ticker, 'BUY', n, price)
-        self.valuation = self.get_valuation()
+        self.valuation = float(self.get_valuation()) / 100
 
     def sell_stock(self, ticker, n):
         if ticker == "cash": return
@@ -54,6 +54,10 @@ class DBAPI:
 
         self.cursor.execute(
             f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {int(price * 100)})")
+        self.conn.commit()
+
+    def log_balance(self, valuation, time):
+        self.cursor.execute(f"insert into {self.type}history (valuation, time) values ({valuation}, {time})")
         self.conn.commit()
 
     def drop_stock(self, ticker, n):
@@ -77,15 +81,15 @@ class DBAPI:
         return numSold
 
     def insert_trade(self, ticker, type, quantity, price):
-        trade_id = 0
-        with open('last_trade_id.txt', "r+") as f:
-            trade_id = int(f.read())
-            trade_id += 1
-            f.seek(0)
-            f.write(str(trade_id))
-            f.truncate()
+        # trade_id = 0
+        # with open('last_trade_id.txt', "r+") as f:
+        #     trade_id = int(f.read())
+        #     trade_id += 1
+        #     f.seek(0)
+        #     f.write(str(trade_id))
+        #     f.truncate()
 
-        self.cursor.execute(f"insert into {self.type}trades (trade_id, ticker, type, quantity, price) values ({trade_id}, "
+        self.cursor.execute(f"insert into {self.type}trades (ticker, type, quantity, price) values ("
                              f"'{ticker}', '{type}', {quantity}, {int(price * 100)})")
         self.conn.commit()
 
