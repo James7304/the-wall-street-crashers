@@ -263,8 +263,8 @@ def predict_today(tickers, investment, date):
     total_pred = sum([pred[0] for pred in ticker_prediction_data.values()])
     ticker_investment = {}
     for ticker in ticker_prediction_data.keys():
-        ticker_investment[ticker] = ((int(investment * ticker_prediction_data[ticker][0] / total_pred)[0] / ticker_prediction_data[ticker][1]), ticker_prediction_data[ticker][1])
-    
+        ticker_investment[ticker] = (((investment * ticker_prediction_data[ticker][0] / total_pred) / ticker_prediction_data[ticker][1])[0], ticker_prediction_data[ticker][1])
+    print(ticker_investment)
     return ticker_investment
         
         
@@ -325,14 +325,18 @@ dbapi = DBAPI("alpha_")
 def daily_update(date):
 
     owned_stocks = dbapi.get_stocks()
-    
+    print(owned_stocks)
+
+    print("valuation before selling: " + str(float(dbapi.get_valuation()) / 100))
+
     try:
         for stock in owned_stocks:
             dbapi.sell_stock(stock["ticker"], stock["quantity"])
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
-    preds = predict_today(all_allowed_stocks, dbapi.get_valuation(), date)
+    print("valuation after selling: " + str(float(dbapi.get_valuation()) / 100))
+    preds = predict_today(all_allowed_stocks, float(dbapi.get_valuation()) / 100, date)
 
     for ticker in preds.keys():
         dbapi.buy_stock(ticker, preds[ticker][0], preds[ticker][1])
