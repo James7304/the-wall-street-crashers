@@ -332,7 +332,8 @@ def daily_update(date):
     try:
         for stock in owned_stocks:
             dbapi.sell_stock(stock["ticker"], stock["quantity"])
-            dbapi.log_balance(float(dbapi.get_valuation()) / 100, date.strftime("%Y-%m-%d %H:%M:%S"))
+            dbapi.log_balance(float(dbapi.get_valuation()) / 100, date.strftime('%Y-%m-%d %H:%M:%S'))
+            # dbapi.log_balance(float(dbapi.get_valuation()) / 100, str(date))
     except Exception as e:
         print(e)
 
@@ -341,7 +342,8 @@ def daily_update(date):
 
     for ticker in preds.keys():
         dbapi.buy_stock(ticker, preds[ticker][0], preds[ticker][1])
-        dbapi.log_balance(float(dbapi.get_valuation()) / 100, date)
+        dbapi.log_balance(float(dbapi.get_valuation()) / 100, date.strftime('%Y-%m-%d %H:%M:%S'))
+        # dbapi.log_balance(float(dbapi.get_valuation()) / 100, str(date))
 
 start_date = pd.Timestamp("2019-01-01")
 end_date = pd.Timestamp("2019-01-04")

@@ -57,7 +57,8 @@ class DBAPI:
         self.conn.commit()
 
     def log_balance(self, valuation, time):
-        self.cursor.execute(f"insert into {self.type}history (valuation, time) values ({valuation}, {time})")
+        print(time)
+        self.cursor.execute(f"insert into {self.type}history (valuation, time) values ({valuation}, '{time}')")
         self.conn.commit()
 
     def drop_stock(self, ticker, n):
