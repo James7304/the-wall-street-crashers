@@ -5,18 +5,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Desposit</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-        <link href="../assets/css/dashboard.css" rel="stylesheet">
+        <link href="../../assets/css/dashboard.css" rel="stylesheet">
         
-        <script type="text/javascript" src="./assets/js/login.js"></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        <script src="./scripts/checkout.js" defer></script>
     </head>
     <body>
 
         <?php
 
             session_start();
-            if(!isset($_SESSION['user_acc'])){
-                header('Location: ../');
+            if(!isset($_SESSION['user_acc']) || !isset($_GET['amount']) || !isset($_GET['end-point'])){
+                header('Location: ../../');
             }
+
+            session_start();
+            $_SESSION['end_point'] = $_GET['end-point'];
 
         ?>
         
@@ -38,16 +42,25 @@
                     Checkout
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Deposit Amount (£)</h5>
-                    <input type="number" class="form-control" id="deposit-amount">
-                    <button class="btn btn-primary mt-2" onclick="deposit()">Desposit</button>
-                    <p class="text-danger d-none mt-2" id="missing-details">Missing amount</p>
+                    <!-- Display a payment form -->
+                    <form id="payment-form">
+                        <div id="link-authentication-element">
+                            <!--Stripe.js injects the Link Authentication Element-->
+                        </div>
+                        <div id="payment-element">
+                            <!--Stripe.js injects the Payment Element-->
+                        </div>
+                        <button id="submit" class="btn btn-primary mt-3">
+                            <div class="spinner hidden" id="spinner"></div>
+                            <span id="button-text">Deposit</span>
+                        </button>
+                        <div id="payment-message" class="hidden"></div>
+                    </form>
                 </div>
             </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="../assets/js/deposit.js" type="text/javascript"></script>
 
     </body>
 </html>

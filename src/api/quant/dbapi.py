@@ -1,5 +1,6 @@
 import pymysql.cursors
 
+
 # # Set the database credentials
 # host = "sql750.main-hosting.eu"
 # user = "u202629177_wsc"
@@ -19,18 +20,17 @@ import pymysql.cursors
 # cursor = conn.cursor()
 
 class DBAPI:
-    conn = None
-    cursor = None
-    @staticmethod
-    def init():
+    def __init__(self, type):
         # Set the database credentials
         host = "sql750.main-hosting.eu"
         user = "u202629177_wsc"
         password = "z0|xo@!K"
         database = "u202629177_wsc"
 
+        self.type = type
+
         # Create a connection to the database
-        DBAPI.conn = pymysql.connect(
+        self.conn = pymysql.connect(
             host=host,
             user=user,
             password=password,
@@ -39,43 +39,36 @@ class DBAPI:
         )
 
         # Create a cursor object to execute SQL queries
-        DBAPI.cursor = DBAPI.conn.cursor()
-    @staticmethod
-    def buy_stock(ticker, n, price):
-        DBAPI.insert_stock(ticker, n, price)
+        self.cursor = self.conn.cursor()
 
-        DBAPI.insert_trade(ticker, 'BUY', n, price)
+    def buy_stock(self, ticker, n, price):
+        self.insert_stock(ticker, n, price)
+        self.insert_trade(ticker, 'BUY', n, price)
+        self.valuation = self.get_valuation()
 
-        valuation = DBAPI.get_valuation()
+    def sell_stock(self, ticker, n):
+        price = self.get_stock(ticker)["price_per_unit"]
+        self.drop_stock(ticker, n)
+        self.insert_trade(ticker, 'SELL', n, price)
+        self.valuation = self.get_valuation()
 
-    @staticmethod
-    def sell_stock(ticker, n):
-        price = DBAPI.get_stock(ticker)["price_per_unit"]
-        DBAPI.drop_stock(ticker, n)
+    def insert_stock(self, ticker, n, price):
+        self.cursor.execute(
+            f"insert into " + self.type + "portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
+        self.conn.commit()
 
-        DBAPI.insert_trade(ticker, 'SELL', n, price)
+    def drop_stock(self, ticker, n):
+        self.cursor.execute(f"select * from " + self.type + "portfolio where ticker='{ticker}'")
+        quantity = self.cursor.fetchone()["quantity"]
+        self.cursor.execute(f"update " + self.type + "portfolio set quantity={quantity - n} where ticker='{ticker}'")
+        self.conn.commit()
 
-        valuation = DBAPI.get_valuation()
-
-    @staticmethod
-    def insert_stock(ticker, n, price):
-        DBAPI.cursor.execute(f"insert into portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
-        DBAPI.conn.commit()
-
-    @staticmethod
-    def drop_stock(ticker, n):
-        DBAPI.cursor.execute(f"select * from portfolio where ticker='{ticker}'")
-        quantity = DBAPI.cursor.fetchone()["quantity"]
-        DBAPI.cursor.execute(f"update portfolio set quantity={quantity-n} where ticker='{ticker}'")
-        DBAPI.conn.commit()
-
-        if quantity-n <= 0:
-            DBAPI.cursor.execute(f"delete from portfolio where ticker='{ticker}'")
-            DBAPI.conn.commit()
+        if quantity - n <= 0:
+            self.cursor.execute(f"delete from " + self.type + "portfolio where ticker='{ticker}'")
+            self.conn.commit()
             return
 
-    @staticmethod
-    def insert_trade(ticker, type, quantity, price):
+    def insert_trade(self, ticker, type, quantity, price):
         trade_id = 0
         with open('last_trade_id.txt', "r+") as f:
             trade_id = int(f.read())
@@ -84,47 +77,36 @@ class DBAPI:
             f.write(str(trade_id))
             f.truncate()
 
-        DBAPI.cursor.execute(f"insert into trades (trade_id, ticker, type, quantity, price) values ({trade_id}, "
-                       f"'{ticker}', '{type}', {quantity}, {price})")
-        DBAPI.conn.commit()
+        self.cursor.execute(f"insert into " + self.type + "trades (trade_id, ticker, type, quantity, price) values ({trade_id}, "
+                             f"'{ticker}', '{type}', {quantity}, {price})")
+        self.conn.commit()
 
-    @staticmethod
-    def get_stock(ticker):
-        DBAPI.cursor.execute(f"select * from portfolio where ticker='{ticker}'")
-        return DBAPI.cursor.fetchone()
+    def get_stock(self, ticker):
+        self.cursor.execute(f"select * from " + self.type + "portfolio where ticker='{ticker}'")
+        return self.cursor.fetchone()
 
-    @staticmethod
-    def get_trade(trade_id):
-        DBAPI.cursor.execute(f"select * from trades where trade_id={trade_id}")
-        return DBAPI.cursor.fetchone()
+    def get_trade(self, trade_id):
+        self.cursor.execute(f"select * from " + self.type + "trades where trade_id={trade_id}")
+        return self.cursor.fetchone()
 
-    @staticmethod
-    def get_trades(ticker):
-        DBAPI.cursor.execute(f"select * from trades where ticker='{ticker}'")
-        return DBAPI.cursor.fetchall()
+    def get_trades(self, ticker):
+        self.cursor.execute(f"select * from " + self.type + "trades where ticker='{ticker}'")
+        return self.cursor.fetchall()
 
-    @staticmethod
-    def get_valuation():
-        DBAPI.cursor.execute("select * from portfolio")
-        stocks = DBAPI.cursor.fetchall()
+    def get_valuation(self):
+        self.cursor.execute("select * from " + self.type + "portfolio")
+        stocks = self.cursor.fetchall()
         return sum(stock["price_per_unit"] for stock in stocks)
 
-    @staticmethod
-    def clean_all():
+    def clean_all(self):
         if input("Are you sure you want to clean the portfolio and trades tables ?").lower() != "y": return
 
-        DBAPI.cursor.execute("delete from portfolio")
-        DBAPI.conn.commit()
+        self.cursor.execute("delete from " + self.type + "portfolio")
+        self.conn.commit()
 
-        DBAPI.cursor.execute("delete from trades")
-        DBAPI.conn.commit()
+        self.cursor.execute("delete from " + self.type + "trades")
+        self.conn.commit()
 
-    @staticmethod
-    def close():
-        DBAPI.cursor.close()
-        DBAPI.conn.close()
-
-# clean_all()
-DBAPI.init()
-print(DBAPI.get_trades("MSFT"))
-DBAPI.close()
+    def close(self):
+        self.cursor.close()
+        self.conn.close()
