@@ -35,11 +35,7 @@ def sell(stock_i):
 	api.sell_stock(get_ticker(), 1, price)
 	return
 
-buy(stock_i)
 
-#print(api.get_stock('AAPssL'))
-
-"""
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
@@ -143,4 +139,3 @@ while True:
 # cleanup the camera and close any open windows
 vs.stop() if args.get("video", None) is None else vs.release()
 cv2.destroyAllWindows()
-"""

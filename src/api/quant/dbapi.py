@@ -55,10 +55,11 @@ class DBAPI:
         self.valuation = self.get_valuation()
 
     def insert_stock(self, ticker, n, price):
-        self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}")
+
+        self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
         if len(self.cursor.fetchall()) >= 0:
-            self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{n} where ticker='{ticker}")
-            self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity-{n * price} where ticker='cash'")
+            self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{n} , price_per_unit = {int(price * 100)} where ticker='{ticker}'")
+            self.cursor.execute(f"update {self.type}portfolio set quantity=quantity-{n * int(price * 100)} where ticker='cash'")
             self.conn.commit()
             return
 
