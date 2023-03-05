@@ -12,6 +12,7 @@ import datetime as dt
 import yfinance as yf
 import matplotlib.pyplot as plt
 import seaborn as sns
+from dbapi import DBAPI
 
 def average_directional_index(high, low, close, period):
     # Calculate directional movement 
@@ -34,7 +35,8 @@ def average_directional_index(high, low, close, period):
     minus_di = 100 * (minus_dm_period/tr_period)
     dx = 100 * abs((plus_di - minus_di)/(plus_di + minus_di))
 
-    #Calculates the ADXwith open("temp.txt", "w+") as f:
+    #Calculates the ADX
+    # with open("temp.txt", "w+") as f:
 #     f.write(df["price_change"].to_string())
     adx = dx.rolling(window=period).mean()
 
@@ -58,7 +60,7 @@ def define_df(ticker):
     # data = response.json()
 
     df = yf.download(ticker, start="1990-01-01", end="2023-03-05")
-    df = df.iloc[::-1]
+    #df = df.iloc[::-1]
     df.index = df.index.date.astype(str)
     df = df.rename(columns={"Open": "1. open", "High": "2. high", "Low": "3. low", "Close": "4. close", "Adj Close": "5. adjusted close", "Volume": "6. volume", "Dividends": "7. dividend amount", "Stock Splits": "8. split coefficient"})
     df = df.astype(float)
@@ -73,23 +75,23 @@ def define_df(ticker):
     # sns.lineplot(x=df.loc["2021-01-01":"2020-01-01",].index, y="4. close", data=df.loc["2021-01-01":"2020-01-01",])
     # # plt.plot(df.loc["2021-01-01":"2020-01-01", "4. close"])
     # plt.show()
-
+    shape_before = df.shape
     with open("temp.txt", "w+") as f:
         f.write(df.to_string())
 
     # df = pd.concat([df, df], axis=0)
-
+    
     # Remove missing values and outliers
     df = df.dropna()
     df = df[df['5. adjusted close'] > 0]
 
-
+    
     # Compute daily price change as percentage of previous day's close
     df['price_change'] = (df['5. adjusted close'] - df['5. adjusted close'].shift(1)) / df['5. adjusted close'].shift(1)
 
     #Remove NaN value introduced from above command 
-    df = df.dropna()
-
+    #df = df.dropna()
+    
     # Scale data to range between 0 and 1
     # scaler = MinMaxScaler()
     # df['price_change'] = scaler.fit_transform(df[['price_change']])
@@ -97,11 +99,18 @@ def define_df(ticker):
     # Compute technical indicators
     df['ma50'] = SMAIndicator(df['price_change'], window=50).sma_indicator()
     df['ma200'] = SMAIndicator(df['price_change'], window=200).sma_indicator()
-    df['rsi14'] = RSIIndicator(df['5. adjusted close'], window=14).rsi()
-    df = df.dropna()
-
+    df['rsi14'] = RSIIndicator(df['5. adjusted close'], window=14 ).rsi()
+    # df = df.dropna()
+    
+    # print(df[df.isna().any(axis=1)])
+    
     df['adx14'] = average_directional_index(df['2. high'], df['3. low'], df['5. adjusted close'], 14)
     df = df.dropna()
+    
+    shape_after = df.shape
+    print("Shape before: " + str(shape_before[0]) + ", shape after: " + str(shape_after[0]))
+    #print("IsNa:")
+    #print(df)
 
     # Define features and target variable
     X = df[['ma50', 'ma200', 'rsi14', 'adx14']]
@@ -164,10 +173,12 @@ def predicted_price_change(ticker, df, model, date):
     # date = pd.Timestamp("2023-03-15")
     #lookahead_date = date + pd.Timedelta(lookahead_days)
     #lookahead_date = pd.Timestamp("2023-03-05")
-    current_features = df.loc[str(date - pd.Timedelta(days=1)):str(date - pd.Timedelta(days=200)), cols].tail(1)
+    end_date = str(date - pd.Timedelta(days=1))[:10]
+    start_date = str(date - pd.Timedelta(days=200))[:10]
+
+    current_features = df.loc[str(date - pd.Timedelta(days=200)):str(date - pd.Timedelta(days=1)), cols].tail(1)
     # print(df.loc[str(date - pd.Timedelta(days=1)):str(date - pd.Timedelta(days=200)), cols])
     #future_features = df.loc[str(lookahead_date - pd.Timedelta(days=1)):str(lookahead_date - pd.Timedelta(days=200)), cols].tail(1)
-
 
     return model.predict(current_features)
 
@@ -211,21 +222,53 @@ def trialRun(tickers, start_date, end_date):
     for ticker in tickers:
         ticker_data[ticker] = define_df(ticker)
 
-    dates = [ticker_data[ticker][1].loc[end_date:start_date,].index.values.tolist() for ticker in ticker_data.keys()]
-    dates = set(dates[0]).intersection(*dates)
-    for date in dates:
+    # dates = [ticker_data[ticker][1].loc[end_date:start_date,].index.values.tolist() for ticker in ticker_data.keys()]
+    # dates = set(dates[0]).intersection(*dates)
+
+
+    date = start_date
+    # for date in dates:
+    while date <= end_date:
+        ticker_investment = predict_today(tickers, initialBalance, date)
+        
         ticker_prediction_data = {}
         for ticker in ticker_data.keys():
-            model = ticker_data[ticker][0]
-            df = ticker_data[ticker][1]
-            ticker_prediction_data[ticker] = predicted_price_change("", df, model, pd.Timestamp(date))
+           model = ticker_data[ticker][0]
+           df = ticker_data[ticker][1]
+           ticker_prediction_data[ticker] = predicted_price_change("", df, model, pd.Timestamp(date))
 
-        max_ticker = min(ticker_prediction_data, key=lambda x:ticker_prediction_data[x])
-        if ticker_prediction_data[max_ticker] < 0:
-                initialBalance *=  1 + ((ticker_data[ticker][1].loc[str(date)[:10], "4. close"] - ticker_data[ticker][1].loc[str(date)[:10], "1. open"]) / ticker_data[ticker][1].loc[str(date)[:10], "1. open"])
-                balance_over_time.append((date, initialBalance))
+        #max_ticker = min(ticker_prediction_data, key=lambda x:ticker_prediction_data[x])
+        #if ticker_prediction_data[max_ticker] < 0:
+        for ticker in ticker_investment.keys():
+            initialBalance +=  ticker_investment[ticker] * ((ticker_data[ticker][1].loc[str(date)[:10], "4. close"] - ticker_data[ticker][1].loc[str(date)[:10], "1. open"]) / ticker_data[ticker][1].loc[str(date)[:10], "1. open"])
+            balance_over_time.append((date, initialBalance))
+        
+        date += pd.Timedelta(days=1)
 
     return initialBalance
+
+def predict_today(tickers, investment, date):
+    ticker_data = {}
+    for ticker in tickers:
+        ticker_data[ticker] = define_df(ticker)
+
+    ticker_prediction_data = {}
+    for ticker in ticker_data.keys():
+        model = ticker_data[ticker][0]
+        df = ticker_data[ticker][1]
+        pred = predicted_price_change("", df, model, pd.Timestamp(date))
+        if pred < 0:
+            ticker_prediction_data[ticker] = pred
+
+    total_pred = sum(ticker_prediction_data.values())
+    ticker_investment = {}
+    for ticker in ticker_prediction_data.keys():
+        ticker_investment[ticker] = (investment * ticker_prediction_data[ticker] / total_pred)[0]
+    
+    return ticker_investment
+        
+        
+
 
 # model_aapl, df_aapl = define_df("AAPL")
 
@@ -244,12 +287,13 @@ model_aapl, df_aapl = define_df("NEX.L")
 
 # print(df_aapl)
 indices = df_aapl.loc["2010-03-07":"2008-01-01", "price_change"].index.values
-start_date = "2008-01-01"
-end_date = "2010-03-07"
+start_date = pd.Timestamp("2020-01-01")
+end_date = pd.Timestamp("2023-03-05")
 # print(indices)
 # (model_aapl, df_aapl, "AAPL"), (model_meta, df_meta, "META"), (model_nflx, df_nflx, "NFLX"), (model_tsla, df_tsla, "TSLA"), (model_msft, df_msft, "MSFT")
-print(trialRun(["AAPL", "NFLX", "MSFT"], start_date, end_date))
-# print(trialRun(["NEX.L"], start_date, end_date))
+tickers = ["AAPL", "NFLX", "MSFT", "META", "AMZN", "TSLA"]
+#print(predict_today(tickers, 5000))
+# print(trialRun(tickers, start_date, end_date))
 """
 for date in preds.index:
     # Get features for current day
@@ -275,3 +319,34 @@ for date in preds.index:
 """
 
 #print(predicted_price_change("something", "2023-02-25", df))
+
+all_allowed_stocks = ["AAPL", "MSFT", "TSLA", "NFLX", "META"]#, "GOOG", "NVDA", "ABNB", "PANW", "ZM", "CRWD"]
+dbapi = DBAPI("alpha_")
+def daily_update(date):
+
+    owned_stocks = dbapi.get_stocks()
+    
+    try:
+        for stock in owned_stocks:
+            dbapi.sell_stock(stock["ticker"], stock["quantity"])
+    except:
+        pass
+
+    preds = predict_today(all_allowed_stocks, dbapi.get_valuation(), date)
+
+    for ticker in preds.keys():
+        dbapi.buy_stock(ticker, preds[ticker] // dbapi.get_stock(ticker)["price_per_unit"], dbapi.get_stock(ticker)["price_per_unit"])
+
+start_date = pd.Timestamp("2019-01-01")
+end_date = pd.Timestamp("2019-01-04")
+date = start_date
+while date <= end_date:
+
+    print("daily_update")
+    daily_update(date)
+
+    date += pd.Timedelta(days=1)
+
+print(dbapi.get_valuation())
+
+dbapi.close()
