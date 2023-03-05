@@ -340,7 +340,6 @@ def daily_update(date):
     preds = predict_today(all_allowed_stocks, float(dbapi.get_valuation()) / 100, date)
 
     for ticker in preds.keys():
-        if dbapi.get_stock("cash")["quantity"] < 100 * (preds[ticker][0] * preds[ticker][1]): continue
         dbapi.buy_stock(ticker, preds[ticker][0], preds[ticker][1])
         # dbapi.log_balance(float(dbapi.get_valuation()) / 100, date.strftime('%Y-%m-%d %H:%M:%S'))
         # dbapi.log_balance(float(dbapi.get_valuation()) / 100, str(date))
