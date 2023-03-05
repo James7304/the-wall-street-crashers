@@ -16,11 +16,16 @@ try {
     $jsonObj = json_decode($jsonStr);
 
     // Create a PaymentIntent with amount and currency
+    session_start();
     $paymentIntent = \Stripe\PaymentIntent::create([
         'amount' => calculateOrderAmount($jsonObj->amount),
         'currency' => 'gbp',
         'automatic_payment_methods' => [
             'enabled' => true,
+        ],
+        'metadata' => [
+            'user_acc' => $_SESSION['user_acc'],
+            'end_point' => $_SESSION['end_point']
         ],
     ]);
 

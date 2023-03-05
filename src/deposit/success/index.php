@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Desposit Success</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-        <link href="../assets/css/dashboard.css" rel="stylesheet">
+        <link href="../../assets/css/dashboard.css" rel="stylesheet">
         
     </head>
     <body>
@@ -38,13 +38,12 @@
                 </div>
                 <div class="card-body">
                     <h5 class="card-title"><b>£<?php echo intval($_GET['amount'])/100 ?></b> has successfully been deposited into your account</h5>
-                    <a href="../../dashboard">Go back to your dashboard</a>
+                    <a href="../../../dashboard">Go back to your dashboard</a>
                 </div>
             </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="../assets/js/deposit.js" type="text/javascript"></script>
 
     </body>
 </html>

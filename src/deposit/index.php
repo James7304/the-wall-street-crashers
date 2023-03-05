@@ -38,7 +38,11 @@
                 </div>
                 <div class="card-body">
                     <h5 class="card-title mb-4">Deposit Amount (£)</h5>
-                    <input type="number" class="form-control" id="deposit-amount">
+                    <input type="number" class="form-control" id="deposit-amount" placeholder="0.00">
+                    <select class="form-select mt-2" id="end-point">
+                        <option value="alpha_" <?php if(isset($_GET['end-point']) && $_GET['end-point'] == 'alpha_') echo "selected" ?>>Alpha</option>
+                        <option value="hacky_" <?php if(isset($_GET['end-point']) && $_GET['end-point'] == 'hacky_') echo "selected" ?>>Hacky</option>
+                    </select>
                     <button class="btn btn-primary mt-2" onclick="deposit()">Desposit</button>
                     <p class="text-danger d-none mt-2" id="missing-details">Missing amount</p>
                 </div>

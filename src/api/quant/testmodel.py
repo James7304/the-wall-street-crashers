@@ -9,47 +9,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import datetime as dt
-# Set API key and endpoint
-api_key = '7KTQMHOTNVZNC39I'
-endpoint = 'https://www.alphavantage.co/query'
-
-# Define parameters for API call
-params = {
-    'function': 'TIME_SERIES_DAILY_ADJUSTED',
-    'symbol': 'AAPL',
-    'outputsize': 'full',
-    'apikey': api_key
-}
-
-# Make API call and store response as JSON
-response = requests.get(endpoint, params=params)
-data = response.json()
-
-# Convert JSON to DataFrame
-df = pd.DataFrame.from_dict(data['Time Series (Daily)'], orient='index')
-df = df.astype(float)
-
-
-# Remove missing values and outliers
-df = df.dropna()
-df = df[df['5. adjusted close'] > 0]
-
-
-# Compute daily price change as percentage of previous day's close
-df['price_change'] = (df['5. adjusted close'] - df['5. adjusted close'].shift(1)) / df['5. adjusted close'].shift(1)
-
-#Remove NaN value introduced from above command 
-df = df.dropna()
-
-# Scale data to range between 0 and 1
-scaler = MinMaxScaler()
-df['price_change'] = scaler.fit_transform(df[['price_change']])
-
-# Compute technical indicators
-df['ma50'] = SMAIndicator(df['price_change'], window=50).sma_indicator()
-df['ma200'] = SMAIndicator(df['price_change'], window=200).sma_indicator()
-df['rsi14'] = RSIIndicator(df['5. adjusted close'], window=14).rsi()
-df = df.dropna()
+import yfinance as yf
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def average_directional_index(high, low, close, period):
     # Calculate directional movement 
@@ -72,24 +34,93 @@ def average_directional_index(high, low, close, period):
     minus_di = 100 * (minus_dm_period/tr_period)
     dx = 100 * abs((plus_di - minus_di)/(plus_di + minus_di))
 
-    #Calculates the ADX
+    #Calculates the ADXwith open("temp.txt", "w+") as f:
+#     f.write(df["price_change"].to_string())
     adx = dx.rolling(window=period).mean()
 
     return adx
 
-df['adx14'] = average_directional_index(df['2. high'], df['3. low'], df['5. adjusted close'], 14)
-df = df.dropna()
+def define_df(ticker):    
+    # Set API key and endpoint
+    api_key = '7KTQMHOTNVZNC39I'
+    endpoint = 'https://www.alphavantage.co/query'
 
-# Define features and target variable
-X = df[['ma50', 'ma200', 'rsi14', 'adx14']]
-y = df['price_change']
+    # Define parameters for API call
+    params = {
+        'function': 'TIME_SERIES_DAILY_ADJUSTED',
+        'symbol': ticker,
+        'outputsize': 'full',
+        'apikey': api_key
+    }
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Make API call and store response as JSON
+    # response = requests.get(endpoint, params=params)
+    # data = response.json()
 
-# Train random forest regression model
-model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
-model.fit(X_train, y_train)
+    df = yf.download(ticker, start="1990-01-01", end="2023-03-05")
+    df = df.iloc[::-1]
+    df.index = df.index.date.astype(str)
+    df = df.rename(columns={"Open": "1. open", "High": "2. high", "Low": "3. low", "Close": "4. close", "Adj Close": "5. adjusted close", "Volume": "6. volume", "Dividends": "7. dividend amount", "Stock Splits": "8. split coefficient"})
+    df = df.astype(float)
+    df["7. dividend amount"] = np.array(0)
+    df["8. split coefficient"] = np.array(1.0)
+    # print(df_tickers)
+    # Convert JSON to DataFrame
+
+    # df = df_tickers
+    # df = df.astype(float)
+
+    # sns.lineplot(x=df.loc["2021-01-01":"2020-01-01",].index, y="4. close", data=df.loc["2021-01-01":"2020-01-01",])
+    # # plt.plot(df.loc["2021-01-01":"2020-01-01", "4. close"])
+    # plt.show()
+
+    with open("temp.txt", "w+") as f:
+        f.write(df.to_string())
+
+    # df = pd.concat([df, df], axis=0)
+
+    # Remove missing values and outliers
+    df = df.dropna()
+    df = df[df['5. adjusted close'] > 0]
+
+
+    # Compute daily price change as percentage of previous day's close
+    df['price_change'] = (df['5. adjusted close'] - df['5. adjusted close'].shift(1)) / df['5. adjusted close'].shift(1)
+
+    #Remove NaN value introduced from above command 
+    df = df.dropna()
+
+    # Scale data to range between 0 and 1
+    # scaler = MinMaxScaler()
+    # df['price_change'] = scaler.fit_transform(df[['price_change']])
+
+    # Compute technical indicators
+    df['ma50'] = SMAIndicator(df['price_change'], window=50).sma_indicator()
+    df['ma200'] = SMAIndicator(df['price_change'], window=200).sma_indicator()
+    df['rsi14'] = RSIIndicator(df['5. adjusted close'], window=14).rsi()
+    df = df.dropna()
+
+    df['adx14'] = average_directional_index(df['2. high'], df['3. low'], df['5. adjusted close'], 14)
+    df = df.dropna()
+
+    # Define features and target variable
+    X = df[['ma50', 'ma200', 'rsi14', 'adx14']]
+    y = df['price_change']
+
+    # Split data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Train random forest regression model
+    model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Evaluate model performance on testing data
+    mse = mean_squared_error(y_test, model.predict(X_test))
+    rmse = np.sqrt(mse)
+    print(f"RMSE on testing data: {rmse}")
+
+    return (model, df)
+
 """
 # Split data into training and testing sets
 train_data = df.loc['2011-01-01':'2020-12-31']
@@ -105,32 +136,142 @@ y_test = test_data['price_change']
 model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
 model.fit(X_train, y_train)
 """
-# Evaluate model performance on testing data
-mse = mean_squared_error(y_test, model.predict(X_test))
-rmse = np.sqrt(mse)
-print(f"RMSE on testing data: {rmse}")
-print(df)
+
+
 # Set start and end dates for prediction
-start_date = dt.datetime(2022, 1, 1)
-end_date = dt.datetime(2023, 3, 4)
+start_date = dt.datetime(2022, 1, 1).date()
+end_date = dt.datetime(2023, 3, 4).date()
 
 # Create DataFrame for predictions
-preds = pd.DataFrame(index=pd.date_range(start=start_date, end=end_date, freq='D'), columns=['predicted_price_change'])
-"""
+#preds = pd.DataFrame(index=df.index, columns=['predicted_price_change'])
+#print(preds)
+
+# preds.index.apply(lambda x: pd.Timestamp(x))
 # Make predictions for each day
+# df.index.values.astype(str)
+# print(df)
+
+# date = pd.Timestamp("2023-03-01")
+# print(str(date - pd.Timedelta(days=200))[:10])
+# print(str(date - pd.Timedelta(days=200))[:10], str(date - pd.Timedelta(days=1))[:10],)
+
+# print(df.loc[str(date - pd.Timedelta(days=1))[:10]:str(date - pd.Timedelta(days=200))[:10], cols])
+
+def predicted_price_change(ticker, df, model, date):
+    # global cols
+    cols = ['ma50', 'ma200', 'rsi14', 'adx14']
+    # date = pd.Timestamp(df.index[0])
+    # date = pd.Timestamp("2023-03-15")
+    #lookahead_date = date + pd.Timedelta(lookahead_days)
+    #lookahead_date = pd.Timestamp("2023-03-05")
+    current_features = df.loc[str(date - pd.Timedelta(days=1)):str(date - pd.Timedelta(days=200)), cols].tail(1)
+    # print(df.loc[str(date - pd.Timedelta(days=1)):str(date - pd.Timedelta(days=200)), cols])
+    #future_features = df.loc[str(lookahead_date - pd.Timedelta(days=1)):str(lookahead_date - pd.Timedelta(days=200)), cols].tail(1)
+
+
+    return model.predict(current_features)
+
+# with open("temp.txt", "w+") as f:
+#     f.write(df["price_change"].to_string())
+
+# price_change = [predicted_price_change("", df, pd.Timestamp("2023-02-04") + pd.Timedelta(days=i)) for i in range(100)]
+# df.loc["2023-03-03":"2023-02-03", "price_change"].plot()
+# plt.show()
+
+# mse2 = mean_squared_error(df["price_change"].head(100).values, price_change)
+# print("RMSE2: " + str(np.sqrt(mse2)))
+
+
+balance_over_time = []
+def trialRun(tickers, start_date, end_date):
+    global balance_over_time
+    initialBalance = 5000
+    # for date in dates:
+    #     predictions = [(tuple[2], predicted_price_change("", tuple[1], tuple[0] pd.Timestamp(date))) for tuple in data]
+    #     max = max([prediction[1] for prediction in predictions])
+
+    #     max = (data[0][2], predicted_price_change("", data[0][1], data[0][0] pd.Timestamp(date)))
+    #     for tuple in data:
+    #         if predicted_price_change("", data[0][1], data[0][0] pd.Timestamp(date)) > max[1]:
+    #             max = (tuple[2], predicted_price_change("", tuple[1], tuple[0] pd.Timestamp(date)))
+
+        
+    #     initialBalance *=  1 + ((df.loc[str(date)[:10], "4. close"] - df.loc[str(date)[:10], "1. open"]) / df.loc[str(date)[:10], "1. open"])
+    #     balance_over_time.append((date, initialBalance))
+
+
+        # for tuple in data:
+        #     model = tuple[0]
+        #     df = tuple[1]
+        #     if predicted_price_change("", df, model, pd.Timestamp(date)) > 0:
+        #         initialBalance *=  1 + ((df.loc[str(date)[:10], "4. close"] - df.loc[str(date)[:10], "1. open"]) / df.loc[str(date)[:10], "1. open"])
+        #         balance_over_time.append((date, initialBalance))
+
+    ticker_data = {}
+    for ticker in tickers:
+        ticker_data[ticker] = define_df(ticker)
+
+    dates = [ticker_data[ticker][1].loc[end_date:start_date,].index.values.tolist() for ticker in ticker_data.keys()]
+    dates = set(dates[0]).intersection(*dates)
+    for date in dates:
+        ticker_prediction_data = {}
+        for ticker in ticker_data.keys():
+            model = ticker_data[ticker][0]
+            df = ticker_data[ticker][1]
+            ticker_prediction_data[ticker] = predicted_price_change("", df, model, pd.Timestamp(date))
+
+        max_ticker = min(ticker_prediction_data, key=lambda x:ticker_prediction_data[x])
+        if ticker_prediction_data[max_ticker] < 0:
+                initialBalance *=  1 + ((ticker_data[ticker][1].loc[str(date)[:10], "4. close"] - ticker_data[ticker][1].loc[str(date)[:10], "1. open"]) / ticker_data[ticker][1].loc[str(date)[:10], "1. open"])
+                balance_over_time.append((date, initialBalance))
+
+    return initialBalance
+
+# model_aapl, df_aapl = define_df("AAPL")
+
+
+
+# plt.plot(balance_over_time)
+# plt.plot(df.loc["2023-01-02":"2021-12-06", "4. close"])
+# plt.show()
+
+
+model_aapl, df_aapl = define_df("NEX.L")
+# model_meta, df_meta = define_df("META")
+# model_nflx, df_nflx = define_df("NFLX")
+# model_tsla, df_tsla = define_df("TSLA")
+# model_msft, df_msft = define_df("MSFT")
+
+# print(df_aapl)
+indices = df_aapl.loc["2010-03-07":"2008-01-01", "price_change"].index.values
+start_date = "2008-01-01"
+end_date = "2010-03-07"
+# print(indices)
+# (model_aapl, df_aapl, "AAPL"), (model_meta, df_meta, "META"), (model_nflx, df_nflx, "NFLX"), (model_tsla, df_tsla, "TSLA"), (model_msft, df_msft, "MSFT")
+print(trialRun(["AAPL", "NFLX", "MSFT"], start_date, end_date))
+# print(trialRun(["NEX.L"], start_date, end_date))
+"""
 for date in preds.index:
     # Get features for current day
-    current_features = df.loc[date - pd.Timedelta(days=200):date - pd.Timedelta(days=1), ['ma50', 'ma200', 'rsi14', 'adx14']].tail(1)
+    #date = pd.Timestamp(date.date())
+    current_features = df.loc[str(date)[:10], ['ma50', 'ma200', 'rsi14', 'adx14']]
+    #current_features = df.loc[date - pd.Timedelta(days=200):date - pd.Timedelta(days=1), ['ma50', 'ma200', 'rsi14', 'adx14']]
+    print(current_features)
     
     # Make prediction
     current_pred = model.predict(current_features)
 
     # Save prediction in DataFrame
     preds.loc[date] = current_pred[0]
+    
 
+"""
+"""
 # Only buy stocks if predicted price change is positive
 bought_stocks = []
 for date in preds.index:
     if preds.loc[date, 'predicted_price_change'] > 0:
         bought_stocks.append(date)
 """
+
+#print(predicted_price_change("something", "2023-02-25", df))

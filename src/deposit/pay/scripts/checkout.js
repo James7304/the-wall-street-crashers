@@ -19,7 +19,7 @@ let emailAddress = '';
 // Fetches a payment intent and captures the client secret
 async function initialize() {
     
-  const { clientSecret } = await fetch("./pay/scripts/create.php", {
+  const { clientSecret } = await fetch("./scripts/create.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ amount }),
@@ -46,7 +46,7 @@ async function handleSubmit(e) {
     elements,
     confirmParams: {
       // Make sure to change this to your payment completion page
-      return_url: "http://localhost:8080/deposit/success",
+      return_url: "https://wsc.jamesmccorkindale.co.uk/src/deposit/success/?amount=" + amount.amount,
       receipt_email: emailAddress,
     },
   });

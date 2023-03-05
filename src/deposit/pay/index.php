@@ -5,19 +5,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Desposit</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-        <link href="../assets/css/dashboard.css" rel="stylesheet">
+        <link href="../../assets/css/dashboard.css" rel="stylesheet">
         
         <script src="https://js.stripe.com/v3/"></script>
-        <script src="./pay/scripts/checkout.js" defer></script>
+        <script src="./scripts/checkout.js" defer></script>
     </head>
     <body>
 
         <?php
 
             session_start();
-            if(!isset($_SESSION['user_acc'])){
+            if(!isset($_SESSION['user_acc']) || !isset($_GET['amount']) || !isset($_GET['end-point'])){
                 header('Location: ../../');
             }
+
+            session_start();
+            $_SESSION['end_point'] = $_GET['end-point'];
 
         ?>
         
@@ -47,9 +50,9 @@
                         <div id="payment-element">
                             <!--Stripe.js injects the Payment Element-->
                         </div>
-                        <button id="submit">
+                        <button id="submit" class="btn btn-primary mt-3">
                             <div class="spinner hidden" id="spinner"></div>
-                            <span id="button-text">Pay now</span>
+                            <span id="button-text">Deposit</span>
                         </button>
                         <div id="payment-message" class="hidden"></div>
                     </form>
@@ -58,7 +61,6 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="../assets/js/deposit.js" type="text/javascript"></script>
 
     </body>
 </html>
