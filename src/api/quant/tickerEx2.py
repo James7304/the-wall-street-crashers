@@ -21,7 +21,7 @@ for line in Lines:
     interval = timedelta(days=6)
 
     # OPEN CSV FILE FOR WRITING
-    with open('amazon_data.csv', 'w') as f:
+    with open('amazon_data.csv', 'a') as f:
         # WRITE HEADER TO CSV FILE
         f.write('Date, Open, High, Low, Close, Volume\n')
 
