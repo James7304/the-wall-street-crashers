@@ -258,12 +258,12 @@ def predict_today(tickers, investment, date):
         df = ticker_data[ticker][1]
         pred = predicted_price_change("", df, model, pd.Timestamp(date))
         if pred < 0:
-            ticker_prediction_data[ticker] = pred
+            ticker_prediction_data[ticker] = (pred, df.loc[df.index.values[-1], "4. close"])
 
-    total_pred = sum(ticker_prediction_data.values())
+    total_pred = sum([pred[0] for pred in ticker_prediction_data.values()])
     ticker_investment = {}
     for ticker in ticker_prediction_data.keys():
-        ticker_investment[ticker] = (investment * ticker_prediction_data[ticker] / total_pred)[0]
+        ticker_investment[ticker] = ((int(investment * ticker_prediction_data[ticker][0] / total_pred)[0] / ticker_prediction_data[ticker][1]), ticker_prediction_data[ticker][1])
     
     return ticker_investment
         
@@ -335,7 +335,7 @@ def daily_update(date):
     preds = predict_today(all_allowed_stocks, dbapi.get_valuation(), date)
 
     for ticker in preds.keys():
-        dbapi.buy_stock(ticker, preds[ticker] // dbapi.get_stock(ticker)["price_per_unit"], dbapi.get_stock(ticker)["price_per_unit"])
+        dbapi.buy_stock(ticker, preds[ticker][0], preds[ticker][1])
 
 start_date = pd.Timestamp("2019-01-01")
 end_date = pd.Timestamp("2019-01-04")
