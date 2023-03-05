@@ -23,16 +23,16 @@ class DBAPI:
     def __init__(self, type):
         # Set the database credentials
         self.host = "sql750.main-hosting.eu"
-        self.user = "u202629177_wsc"
+        self.user = "u202629177_wsc_2"
         self.password = "z0|xo@!K"
-        self.database = "u202629177_wsc"
+        self.database = "u202629177_wsc_2"
 
         self.type = type
         self.open()
 
     def buy_stock(self, ticker, n, price):
         self.insert_stock(ticker, n, price)
-        self.insert_trade(ticker, 'BUY', n, price)
+        self.insert_trade(ticker, 'BUY', n, price * 100)
         self.valuation = float(self.get_valuation()) / 100
 
     def sell_stock(self, ticker, n):
