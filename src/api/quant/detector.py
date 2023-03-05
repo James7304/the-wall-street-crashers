@@ -129,7 +129,7 @@ while True:
 	else:
 		canOrder = True
 		averageX = 0
-	
+		
 		
   	# draw the text and timestamp on the frame
 	cv2.putText(frame, "Room Status: {}".format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)

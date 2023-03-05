@@ -1,5 +1,5 @@
 import pymysql.cursors
-
+import datetime
 
 # # Set the database credentials
 # host = "sql750.main-hosting.eu"
@@ -33,7 +33,7 @@ class DBAPI:
     def buy_stock(self, ticker, n, price):
         self.insert_stock(ticker, n, price)
         self.insert_trade(ticker, 'BUY', n, price)
-        self.valuation = self.get_valuation()
+        self.valuation = float(self.get_valuation()) / 100
 
     def sell_stock(self, ticker, n):
         if ticker == "cash": return
@@ -46,14 +46,19 @@ class DBAPI:
     def insert_stock(self, ticker, n, price):
 
         self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
-        if len(self.cursor.fetchall()) >= 0:
+        if len(self.cursor.fetchall()) > 0:
             self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{n} , price_per_unit = {int(price * 100)} where ticker='{ticker}'")
             self.cursor.execute(f"update {self.type}portfolio set quantity=quantity-{n * int(price * 100)} where ticker='cash'")
             self.conn.commit()
             return
 
         self.cursor.execute(
-            f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
+            f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {int(price * 100)})")
+        self.conn.commit()
+
+    def log_balance(self, valuation, time):
+        print(time)
+        self.cursor.execute(f"insert into {self.type}history (valuation, time) values ({valuation}, '{time}')")
         self.conn.commit()
 
     def drop_stock(self, ticker, n):
@@ -68,7 +73,7 @@ class DBAPI:
 
         if quantity - n <= 0:
             self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
-            self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
+            self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
             numSold = quantity
 
         self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
@@ -77,16 +82,16 @@ class DBAPI:
         return numSold
 
     def insert_trade(self, ticker, type, quantity, price):
-        trade_id = 0
-        with open('last_trade_id.txt', "r+") as f:
-            trade_id = int(f.read())
-            trade_id += 1
-            f.seek(0)
-            f.write(str(trade_id))
-            f.truncate()
+        # trade_id = 0
+        # with open('last_trade_id.txt', "r+") as f:
+        #     trade_id = int(f.read())
+        #     trade_id += 1
+        #     f.seek(0)
+        #     f.write(str(trade_id))
+        #     f.truncate()
 
-        self.cursor.execute(f"insert into {self.type}trades (trade_id, ticker, type, quantity, price) values ({trade_id}, "
-                             f"'{ticker}', '{type}', {quantity}, {price})")
+        self.cursor.execute(f"insert into {self.type}trades (ticker, type, quantity, price) values ("
+                             f"'{ticker}', '{type}', {quantity}, {int(price * 100)})")
         self.conn.commit()
 
     def get_stock(self, ticker):
@@ -108,7 +113,7 @@ class DBAPI:
     def get_valuation(self):
         self.cursor.execute(f"select * from {self.type}portfolio")
         stocks = self.cursor.fetchall()
-        return sum(stock["price_per_unit"] for stock in stocks)
+        return sum(stock["price_per_unit"] * stock["quantity"] for stock in stocks)
 
     def clean_all(self):
         if input("Are you sure you want to clean the portfolio and trades tables ?").lower() != "y": return
