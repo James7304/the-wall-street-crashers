@@ -3,9 +3,8 @@ var historyChart = {alpha_:"", hacky_:""};
 
 function loadValuation(endPoint){
 
-
     var http = new XMLHttpRequest();
-    var url = '../api/trade_data/valuation';
+    var url = '../api/trade_data/valuation/';
     var params = 'end_point=' + endPoint;
     http.open('POST', url, true);
 
@@ -29,7 +28,7 @@ function loadValuation(endPoint){
 function loadTrades(endPoint){
 
     var http = new XMLHttpRequest();
-    var url = '../api/trade_data/trades';
+    var url = '../api/trade_data/trades/';
     var params = 'end_point=' + endPoint;
     http.open('POST', url, true);
 
@@ -69,7 +68,7 @@ function loadTrades(endPoint){
                 const div3 = document.createElement('div');
                 div3.classList.add('col-3', 'p-0', 'pe-2');
                 div3.style.textAlign = 'right';
-                div3.textContent = trade.hour + ':' + (trade.minute.length == 1 ? "0" + trade.minute : trade.minute);
+                div3.textContent = (trade.hour.length == 1 ? "0" + trade.hour : trade.hour) + ':' + (trade.minute.length == 1 ? "0" + trade.minute : trade.minute);
 
                 // Add the three divs to the row div
                 divRow.appendChild(div1);
@@ -89,7 +88,7 @@ function loadTrades(endPoint){
 function loadHistory(endPoint, chartTime){
 
     var http = new XMLHttpRequest();
-    var url = '../api/trade_data/history';
+    var url = '../api/trade_data/history/';
     var params = 'end_point=' + endPoint + '&chartTime=' + chartTime;
     http.open('POST', url, true);
 

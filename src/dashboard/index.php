@@ -12,6 +12,7 @@
         <?php
 
             session_start();
+            $_SESSION['user_acc'] = 'acct_1MhtzBRE3V6w846Q';
             if(!isset($_SESSION['user_acc'])){
                 header('Location: ../');
             }

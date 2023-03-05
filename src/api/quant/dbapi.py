@@ -22,24 +22,13 @@ import pymysql.cursors
 class DBAPI:
     def __init__(self, type):
         # Set the database credentials
-        host = "sql750.main-hosting.eu"
-        user = "u202629177_wsc"
-        password = "z0|xo@!K"
-        database = "u202629177_wsc"
+        self.host = "sql750.main-hosting.eu"
+        self.user = "u202629177_wsc"
+        self.password = "z0|xo@!K"
+        self.database = "u202629177_wsc"
 
         self.type = type
-
-        # Create a connection to the database
-        self.conn = pymysql.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database,
-            cursorclass=pymysql.cursors.DictCursor
-        )
-
-        # Create a cursor object to execute SQL queries
-        self.cursor = self.conn.cursor()
+        self.open()
 
     def buy_stock(self, ticker, n, price):
         self.insert_stock(ticker, n, price)
@@ -82,7 +71,7 @@ class DBAPI:
             self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
             numSold = quantity
 
-        self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
+        self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
         self.conn.commit()
         
         return numSold
@@ -130,6 +119,21 @@ class DBAPI:
         self.cursor.execute(f"delete from {self.type}trades")
         self.conn.commit()
 
+
+    def open(self):
+
+        # Create a connection to the database
+        self.conn = pymysql.connect(
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            database=self.database,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        # Create a cursor object to execute SQL queries
+        self.cursor = self.conn.cursor()
+        
     def close(self):
         self.cursor.close()
         self.conn.close()
