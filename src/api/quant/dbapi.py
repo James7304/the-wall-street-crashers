@@ -31,6 +31,7 @@ class DBAPI:
         self.open()
 
     def buy_stock(self, ticker, n, price):
+        if self.get_stock("cash")["quantity"] < 100 * n * price: return
         self.insert_stock(ticker, n, price)
         self.insert_trade(ticker, 'BUY', n, price * 100)
         self.valuation = float(self.get_valuation()) / 100

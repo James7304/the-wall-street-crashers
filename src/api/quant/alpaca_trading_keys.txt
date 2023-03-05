@@ -1,0 +1,2 @@
+api: CKR5ZGXXOQGR2EACDKEY
+secret: nLEFbNJRG4caZFmbLjrlCtdsdAoz1Ahc6fyHUsdF
