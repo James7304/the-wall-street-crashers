@@ -84,6 +84,10 @@ class DBAPI:
     def get_stock(self, ticker):
         self.cursor.execute(f"select * from " + self.type + "portfolio where ticker='{ticker}'")
         return self.cursor.fetchone()
+    
+    def get_stocks(self):
+        self.cursor.execute(f"select * from " + self.type + "portfolio")
+        return self.cursor.fetchall()
 
     def get_trade(self, trade_id):
         self.cursor.execute(f"select * from " + self.type + "trades where trade_id={trade_id}")
