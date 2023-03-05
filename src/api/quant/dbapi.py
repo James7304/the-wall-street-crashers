@@ -50,26 +50,41 @@ class DBAPI:
         if ticker == "cash": return
         
         price = self.get_stock(ticker)["price_per_unit"]
-        self.drop_stock(ticker, n)
-        self.insert_trade(ticker, 'SELL', n, price)
+        sold = self.drop_stock(ticker, n)
+        self.insert_trade(ticker, 'SELL', sold, price)
         self.valuation = self.get_valuation()
 
     def insert_stock(self, ticker, n, price):
-        print(f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
+        self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}")
+        if len(self.cursor.fetchall()) >= 0:
+            self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{n} where ticker='{ticker}")
+            self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity-{n * price} where ticker='cash'")
+            self.conn.commit()
+            return
+
         self.cursor.execute(
             f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
         self.conn.commit()
 
     def drop_stock(self, ticker, n):
         self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
-        quantity = self.cursor.fetchone()["quantity"]
+        result = self.cursor.fetchone()
+        quantity = result["quantity"]
+        price = result["price_per_unit"]
         self.cursor.execute(f"update {self.type}portfolio set quantity={quantity - n} where ticker='{ticker}'")
         self.conn.commit()
 
+        numSold = n
+
         if quantity - n <= 0:
             self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
-            self.conn.commit()
-            return
+            self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
+            numSold = quantity
+
+        self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
+        self.conn.commit()
+        
+        return numSold
 
     def insert_trade(self, ticker, type, quantity, price):
         trade_id = 0

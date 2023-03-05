@@ -6,6 +6,8 @@ import imutils
 import time
 import cv2
 
+import yfinance as yf
+
 from dbapi import DBAPI
 
 api = DBAPI('hacky_')
@@ -22,14 +24,20 @@ def get_ticker(stock_i):
 	return ticker
 
 def buy(stock_i):
-	api.buy_stock(get_ticker(stock_i), 1, 100)
+	ticker = get_ticker(stock_i)
+    price = yf.Ticker(ticker).history()['Close'].iloc[-1]
+	api.buy_stock(ticker, 1, price)
 	return
 
 def sell(stock_i):
-	#api.sell_stock(get_ticker(), 1, 100)
+	ticker = get_ticker(stock_i)
+    price = yf.Ticker(ticker).history()['Close'].iloc[-1]
+	api.sell_stock(get_ticker(), 1, price)
 	return
 
 buy(stock_i)
+
+#print(api.get_stock('AAPssL'))
 
 """
 # construct the argument parser and parse the arguments
