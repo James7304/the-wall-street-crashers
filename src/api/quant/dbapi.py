@@ -23,9 +23,9 @@ class DBAPI:
     def __init__(self, type):
         # Set the database credentials
         self.host = "sql750.main-hosting.eu"
-        self.user = "u202629177_wsc"
+        self.user = "u202629177_wsc_2"
         self.password = "z0|xo@!K"
-        self.database = "u202629177_wsc"
+        self.database = "u202629177_wsc_2"
 
         self.type = type
         self.open()
@@ -35,7 +35,7 @@ class DBAPI:
 
         print("Has enough money")
         self.insert_stock(ticker, n, price)
-        self.insert_trade(ticker, 'BUY', n, price)
+        self.insert_trade(ticker, 'BUY', n, price * 100)
         self.valuation = float(self.get_valuation()) / 100
 
     def sell_stock(self, ticker, n):
@@ -76,7 +76,11 @@ class DBAPI:
 
         if quantity - n <= 0:
             self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
+<<<<<<< HEAD
             # self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
+=======
+            self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
+>>>>>>> 311f50b8bc2890bd732ae1b0e44d9929059fc73e
             numSold = quantity
 
         self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{numSold * price} where ticker='cash'")
@@ -94,7 +98,7 @@ class DBAPI:
         #     f.truncate()
 
         self.cursor.execute(f"insert into {self.type}trades (ticker, type, quantity, price) values ("
-                             f"'{ticker}', '{type}', {quantity}, {int(price * 100)})")
+                             f"'{ticker}', '{type}', {quantity}, {int(price)})")
         self.conn.commit()
 
     def get_stock(self, ticker):
