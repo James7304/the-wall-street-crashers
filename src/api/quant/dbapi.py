@@ -53,18 +53,19 @@ class DBAPI:
         self.valuation = self.get_valuation()
 
     def insert_stock(self, ticker, n, price):
+        print(f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
         self.cursor.execute(
-            f"insert into " + self.type + "portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
+            f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
         self.conn.commit()
 
     def drop_stock(self, ticker, n):
-        self.cursor.execute(f"select * from " + self.type + "portfolio where ticker='{ticker}'")
+        self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
         quantity = self.cursor.fetchone()["quantity"]
-        self.cursor.execute(f"update " + self.type + "portfolio set quantity={quantity - n} where ticker='{ticker}'")
+        self.cursor.execute(f"update {self.type}portfolio set quantity={quantity - n} where ticker='{ticker}'")
         self.conn.commit()
 
         if quantity - n <= 0:
-            self.cursor.execute(f"delete from " + self.type + "portfolio where ticker='{ticker}'")
+            self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
             self.conn.commit()
             return
 
@@ -77,12 +78,12 @@ class DBAPI:
             f.write(str(trade_id))
             f.truncate()
 
-        self.cursor.execute(f"insert into " + self.type + "trades (trade_id, ticker, type, quantity, price) values ({trade_id}, "
+        self.cursor.execute(f"insert into {self.type}trades (trade_id, ticker, type, quantity, price) values ({trade_id}, "
                              f"'{ticker}', '{type}', {quantity}, {price})")
         self.conn.commit()
 
     def get_stock(self, ticker):
-        self.cursor.execute(f"select * from " + self.type + "portfolio where ticker='{ticker}'")
+        self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
         return self.cursor.fetchone()
     
     def get_stocks(self):
@@ -90,25 +91,25 @@ class DBAPI:
         return self.cursor.fetchall()
 
     def get_trade(self, trade_id):
-        self.cursor.execute(f"select * from " + self.type + "trades where trade_id={trade_id}")
+        self.cursor.execute(f"select * from {self.type}trades where trade_id={trade_id}")
         return self.cursor.fetchone()
 
     def get_trades(self, ticker):
-        self.cursor.execute(f"select * from " + self.type + "trades where ticker='{ticker}'")
+        self.cursor.execute(f"select * from {self.type}trades where ticker='{ticker}'")
         return self.cursor.fetchall()
 
     def get_valuation(self):
-        self.cursor.execute("select * from " + self.type + "portfolio")
+        self.cursor.execute("select * from {self.type}portfolio")
         stocks = self.cursor.fetchall()
         return sum(stock["price_per_unit"] for stock in stocks)
 
     def clean_all(self):
         if input("Are you sure you want to clean the portfolio and trades tables ?").lower() != "y": return
 
-        self.cursor.execute("delete from " + self.type + "portfolio")
+        self.cursor.execute("delete from {self.type}portfolio")
         self.conn.commit()
 
-        self.cursor.execute("delete from " + self.type + "trades")
+        self.cursor.execute("delete from {self.type}trades")
         self.conn.commit()
 
     def close(self):
