@@ -26,7 +26,7 @@
                 </a>
 
                 <div class="col-md-3 text-end">
-                    <a href="../dashboard"><button type="button" class="btn btn-primary">Home</button></a>
+                    <a href="../../dashboard"><button type="button" class="btn btn-primary">Home</button></a>
                 </div>
             </header>
         </div>
@@ -38,7 +38,7 @@
                 </div>
                 <div class="card-body">
                     <h5 class="card-title"><b>£<?php echo intval($_GET['amount'])/100 ?></b> has successfully been deposited into your account</h5>
-                    <a href="../../../dashboard">Go back to your dashboard</a>
+                    <a href="../../dashboard">Go back to your dashboard</a>
                 </div>
             </div>
         </div>

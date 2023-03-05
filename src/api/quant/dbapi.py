@@ -48,15 +48,26 @@ class DBAPI:
 
     def sell_stock(self, ticker, n):
         price = self.get_stock(ticker)["price_per_unit"]
-        self.drop_stock(ticker, n)
-        self.insert_trade(ticker, 'SELL', n, price)
+        sold = self.drop_stock(ticker, n)
+        self.insert_trade(ticker, 'SELL', sold, price)
         self.valuation = self.get_valuation()
 
     def insert_stock(self, ticker, n, price):
+        self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
+        quantity = self.cursor.fetchone()["quantity"]
+        self.cursor.execute(f"update {self.type}portfolio set quantity={quantity + n} where ticker='{ticker}'")
+        self.conn.commit()
+
         print(f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
         self.cursor.execute(
             f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {price})")
         self.conn.commit()
+
+
+        if quantity - n <= 0:
+            self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
+            self.conn.commit()
+            return
 
     def drop_stock(self, ticker, n):
         self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
@@ -67,7 +78,8 @@ class DBAPI:
         if quantity - n <= 0:
             self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
             self.conn.commit()
-            return
+            return quantity
+        return n
 
     def insert_trade(self, ticker, type, quantity, price):
         trade_id = 0

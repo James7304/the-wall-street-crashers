@@ -31,7 +31,7 @@
                 </a>
 
                 <div class="col-md-3 text-end">
-                    <a href="../dashboard"><button type="button" class="btn btn-primary">Home</button></a>
+                    <a href="../../dashboard"><button type="button" class="btn btn-primary">Home</button></a>
                 </div>
             </header>
         </div>
