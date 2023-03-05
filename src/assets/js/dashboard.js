@@ -68,7 +68,7 @@ function loadTrades(endPoint){
                 const div3 = document.createElement('div');
                 div3.classList.add('col-3', 'p-0', 'pe-2');
                 div3.style.textAlign = 'right';
-                div3.textContent = trade.hour + ':' + (trade.minute.length == 1 ? "0" + trade.minute : trade.minute);
+                div3.textContent = (trade.hour.length == 1 ? "0" + trade.hour : trade.hour) + ':' + (trade.minute.length == 1 ? "0" + trade.minute : trade.minute);
 
                 // Add the three divs to the row div
                 divRow.appendChild(div1);
