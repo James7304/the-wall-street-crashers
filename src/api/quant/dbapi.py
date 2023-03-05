@@ -32,16 +32,18 @@ class DBAPI:
 
     def buy_stock(self, ticker, n, price):
         if self.get_stock("cash")["quantity"] < 100 * n * price: return
+
+        print("Has enough money")
         self.insert_stock(ticker, n, price)
         self.insert_trade(ticker, 'BUY', n, price)
         self.valuation = float(self.get_valuation()) / 100
 
     def sell_stock(self, ticker, n):
         if ticker == "cash": return
-        
-        price = self.get_stock(ticker)["price_per_unit"]
-        sold = self.drop_stock(ticker, n)
-        self.insert_trade(ticker, 'SELL', sold, price)
+        print("Sell stock: " + ticker)
+        price = self.get_stock(ticker)["price_per_unit"] / 100
+        nSold = self.drop_stock(ticker, n)
+        self.insert_trade(ticker, 'SELL', nSold, price)
         self.valuation = self.get_valuation()
 
     def insert_stock(self, ticker, n, price):
@@ -74,10 +76,10 @@ class DBAPI:
 
         if quantity - n <= 0:
             self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
-            self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
+            # self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
             numSold = quantity
 
-        self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
+        self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{numSold * price} where ticker='cash'")
         self.conn.commit()
         
         return numSold
@@ -143,3 +145,4 @@ class DBAPI:
     def close(self):
         self.cursor.close()
         self.conn.close()
+        print("Closed connections")

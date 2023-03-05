@@ -13,6 +13,7 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import seaborn as sns
 from dbapi import DBAPI
+import atexit
 
 def average_directional_index(high, low, close, period):
     # Calculate directional movement 
@@ -176,7 +177,7 @@ def predicted_price_change(ticker, df, model, date):
     end_date = str(date - pd.Timedelta(days=1))[:10]
     start_date = str(date - pd.Timedelta(days=200))[:10]
 
-    current_features = df.loc[str(date - pd.Timedelta(days=200)):str(date - pd.Timedelta(days=1)), cols].tail(1)
+    current_features = df.loc[start_date:end_date, cols].tail(1)
     # print(df.loc[str(date - pd.Timedelta(days=1)):str(date - pd.Timedelta(days=200)), cols])
     #future_features = df.loc[str(lookahead_date - pd.Timedelta(days=1)):str(lookahead_date - pd.Timedelta(days=200)), cols].tail(1)
 
@@ -322,16 +323,22 @@ for date in preds.index:
 
 all_allowed_stocks = ["AAPL", "MSFT", "TSLA", "NFLX", "META"]#, "GOOG", "NVDA", "ABNB", "PANW", "ZM", "CRWD"]
 dbapi = DBAPI("alpha_")
+atexit.register(dbapi.close)
+
+portfolio = []
+
+cash = 50000
+valuation = cash
 def daily_update(date):
+    global valuation
+    global cash
 
     owned_stocks = dbapi.get_stocks()
-    print(owned_stocks)
-
-    print("valuation before selling: " + str(float(dbapi.get_valuation()) / 100))
-
+    # print(owned_stocks)
     try:
         for stock in owned_stocks:
             dbapi.sell_stock(stock["ticker"], stock["quantity"])
+            # cash += stock["quantity"] * stock["price_per_unit"]
             # dbapi.log_balance(float(dbapi.get_valuation()) / 100, str(date))
     except Exception as e:
         print(e)
@@ -341,18 +348,20 @@ def daily_update(date):
 
     for ticker in preds.keys():
         dbapi.buy_stock(ticker, preds[ticker][0], preds[ticker][1])
+
+        # cash -= preds[ticker][0] * preds[ticker][1]
+
         # dbapi.log_balance(float(dbapi.get_valuation()) / 100, date.strftime('%Y-%m-%d %H:%M:%S'))
         # dbapi.log_balance(float(dbapi.get_valuation()) / 100, str(date))
-
     dbapi.log_balance(float(dbapi.get_valuation()) / 100, date.strftime('%Y-%m-%d %H:%M:%S'))
 
-start_date = pd.Timestamp("2015-01-01")
-end_date = pd.Timestamp("2018-01-01")
+start_date = pd.Timestamp("2020-01-01")
+end_date = pd.Timestamp("2020-12-31")
 date = start_date
 while date <= end_date:
     daily_update(date)
 
-    date += pd.Timedelta(days=1)
+    date += pd.Timedelta(days=30)
 
 print(dbapi.get_valuation())
 
