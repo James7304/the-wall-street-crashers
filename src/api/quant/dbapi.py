@@ -23,14 +23,15 @@ class DBAPI:
     def __init__(self, type):
         # Set the database credentials
         self.host = "sql750.main-hosting.eu"
-        self.user = "u202629177_wsc_2"
+        self.user = "u202629177_wsc"
         self.password = "z0|xo@!K"
-        self.database = "u202629177_wsc_2"
+        self.database = "u202629177_wsc"
 
         self.type = type
         self.open()
 
     def buy_stock(self, ticker, n, price):
+        print("Buying price: " + str(price))
         if self.get_stock("cash")["quantity"] < 100 * n * price: return
 
         print("Has enough money")
@@ -41,7 +42,7 @@ class DBAPI:
     def sell_stock(self, ticker, n):
         if ticker == "cash": return
         print("Sell stock: " + ticker)
-        price = self.get_stock(ticker)["price_per_unit"] / 100
+        price = self.get_stock(ticker)["price_per_unit"]
         nSold = self.drop_stock(ticker, n)
         self.insert_trade(ticker, 'SELL', nSold, price)
         self.valuation = self.get_valuation()
@@ -51,12 +52,16 @@ class DBAPI:
         self.cursor.execute(f"select * from {self.type}portfolio where ticker='{ticker}'")
         if len(self.cursor.fetchall()) > 0:
             self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{n} , price_per_unit = {int(price * 100)} where ticker='{ticker}'")
+            self.conn.commit()
             self.cursor.execute(f"update {self.type}portfolio set quantity=quantity-{n * int(price * 100)} where ticker='cash'")
             self.conn.commit()
             return
 
         self.cursor.execute(
             f"insert into {self.type}portfolio (ticker, quantity, price_per_unit) values ('{ticker}', {n}, {int(price * 100)})")
+        self.conn.commit()
+        self.cursor.execute(
+            f"update {self.type}portfolio set quantity=quantity-{n * int(price * 100)} where ticker='cash'")
         self.conn.commit()
 
     def log_balance(self, valuation, time):
@@ -69,18 +74,16 @@ class DBAPI:
         result = self.cursor.fetchone()
         quantity = result["quantity"]
         price = result["price_per_unit"]
-        self.cursor.execute(f"update {self.type}portfolio set quantity={quantity - n} where ticker='{ticker}'")
+        self.cursor.execute(f"update {self.type}portfolio set quantity=quantity-{n} where ticker='{ticker}'")
         self.conn.commit()
 
         numSold = n
 
         if quantity - n <= 0:
             self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
-<<<<<<< HEAD
             # self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
-=======
-            self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
->>>>>>> 311f50b8bc2890bd732ae1b0e44d9929059fc73e
+
+            #self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{numSold * price} where ticker='cash'")
             numSold = quantity
 
         self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{numSold * price} where ticker='cash'")
