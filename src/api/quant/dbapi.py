@@ -47,6 +47,8 @@ class DBAPI:
         self.valuation = self.get_valuation()
 
     def sell_stock(self, ticker, n):
+        if ticker == "cash": return
+        
         price = self.get_stock(ticker)["price_per_unit"]
         self.drop_stock(ticker, n)
         self.insert_trade(ticker, 'SELL', n, price)
@@ -87,7 +89,7 @@ class DBAPI:
         return self.cursor.fetchone()
     
     def get_stocks(self):
-        self.cursor.execute(f"select * from " + self.type + "portfolio")
+        self.cursor.execute(f"select * from {self.type}portfolio")
         return self.cursor.fetchall()
 
     def get_trade(self, trade_id):
@@ -99,17 +101,17 @@ class DBAPI:
         return self.cursor.fetchall()
 
     def get_valuation(self):
-        self.cursor.execute("select * from {self.type}portfolio")
+        self.cursor.execute(f"select * from {self.type}portfolio")
         stocks = self.cursor.fetchall()
         return sum(stock["price_per_unit"] for stock in stocks)
 
     def clean_all(self):
         if input("Are you sure you want to clean the portfolio and trades tables ?").lower() != "y": return
 
-        self.cursor.execute("delete from {self.type}portfolio")
+        self.cursor.execute(f"delete from {self.type}portfolio")
         self.conn.commit()
 
-        self.cursor.execute("delete from {self.type}trades")
+        self.cursor.execute(f"delete from {self.type}trades")
         self.conn.commit()
 
     def close(self):
