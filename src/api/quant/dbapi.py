@@ -73,7 +73,7 @@ class DBAPI:
 
         if quantity - n <= 0:
             self.cursor.execute(f"delete from {self.type}portfolio where ticker='{ticker}'")
-            self.cursor.execute(f"udpate {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
+            self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * int(price * 100)} where ticker='cash'")
             numSold = quantity
 
         self.cursor.execute(f"update {self.type}portfolio set quantity=quantity+{quantity * price} where ticker='cash'")
@@ -91,7 +91,7 @@ class DBAPI:
         #     f.truncate()
 
         self.cursor.execute(f"insert into {self.type}trades (ticker, type, quantity, price) values ("
-                             f"'{ticker}', '{type}', {quantity}, {int(price * 100)})")
+                             f"'{ticker}', '{type}', {quantity}, {int(price)})")
         self.conn.commit()
 
     def get_stock(self, ticker):

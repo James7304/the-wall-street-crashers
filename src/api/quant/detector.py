@@ -24,7 +24,7 @@ def get_ticker(stock_i):
 
 def buy(stock_i):
 	ticker = get_ticker(stock_i)
-	price = yf.Ticker(ticker).history()['Close'].iloc[-1] * 100
+	price = yf.Ticker(ticker).history()['Close'].iloc[-1]
 
 	api.open()
 	api.buy_stock(ticker, 1, price)
