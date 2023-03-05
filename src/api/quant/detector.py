@@ -18,7 +18,6 @@ tickers = ["AAPL", "TSLA", "AMZN", "GOOGL"]
 def get_ticker(stock_i):
 
 	ticker = tickers[stock_i]
-	stock_i += 1
 	if stock_i == len(tickers):
 		stock_i = 0
 	return ticker
@@ -117,10 +116,12 @@ while True:
 
 			if fromLeft and averageX > 150:
 				buy(stock_i)
+				stock_i += 1
 				print("buy")
 				canOrder = False
 			elif not fromLeft and averageX <= 150:
 				sell(stock_i)
+				stock_i += 1
 				print("sell")
 				canOrder = False
 			
