@@ -12,7 +12,6 @@
 //   php -S localhost:4242
 
 require '../../../../vendor/autoload.php';
-require '../../../../vendor/autoload.php';
 
 // The library needs to be configured with your account's secret key.
 // Ensure the key is kept out of any version control system you might be using.
